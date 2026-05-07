@@ -1,4 +1,4 @@
-import { createRootRoute, Outlet, Link } from "@tanstack/react-router";
+import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -12,7 +12,9 @@ function RootComponent() {
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
-                <span className="text-xl font-bold text-indigo-600">Sandcastle</span>
+                <span className="text-xl font-bold text-indigo-600">
+                  Sandcastle
+                </span>
               </div>
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                 <Link

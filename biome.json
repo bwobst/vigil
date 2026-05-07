@@ -1,12 +1,23 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.6/schema.json",
-  "organizeImports": {
-    "enabled": true
+  "$schema": "https://biomejs.dev/schemas/2.4.14/schema.json",
+  "files": {
+    "includes": [
+      "src/**",
+      "!src/routeTree.gen.ts",
+      "vite.config.ts",
+      "postcss.config.js",
+      "biome.json",
+      "tsconfig*.json"
+    ]
   },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "suspicious": {
+        "noUnknownAtRules": "off"
+      }
     }
   },
   "formatter": {
