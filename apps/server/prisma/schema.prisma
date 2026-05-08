@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ResponseType {
+  HTML
+  JSON
+}
+
+enum ConditionOperator {
+  EQUALS
+  CHANGED
+  LESS_THAN
+  GREATER_THAN
+}
+
+enum RunStatus {
+  PASS
+  FAIL
+  ERROR
+}
+
+model Watch {
+  id                  String            @id @default(uuid())
+  name                String
+  targetUrl           String
+  responseType        ResponseType
+  extractorExpression String
+  conditionOperator   ConditionOperator
+  expectedValue       String?
+  scheduleExpression  String
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  watchRuns           WatchRun[]
+
+  @@map("watches")
+}
+
+model WatchRun {
+  id             String    @id @default(uuid())
+  watchId        String
+  startedAt      DateTime
+  completedAt    DateTime
+  status         RunStatus
+  extractedValue String?
+  conditionMet   Boolean?
+  error          String?
+
+  watch          Watch     @relation(fields: [watchId], references: [id], onDelete: Cascade)
+
+  @@map("watch_runs")
+}

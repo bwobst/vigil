@@ -4,6 +4,7 @@
     "includes": [
       "src/**",
       "!src/routeTree.gen.ts",
+      "!src/gql/generated/**",
       "vite.config.ts",
       "postcss.config.js",
       "biome.json",
