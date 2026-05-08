@@ -42,4 +42,16 @@ describe("App routing", () => {
       expect(screen.getByRole("link", { name: "About" })).toBeInTheDocument();
     });
   });
+
+  it.each(["/", "/about"])(
+    "shows Vigil brand link navigating to home on %s",
+    async (path) => {
+      renderApp(path);
+      await waitFor(() => {
+        const brand = screen.getByRole("link", { name: "Vigil" });
+        expect(brand).toBeInTheDocument();
+        expect(brand).toHaveAttribute("href", "/");
+      });
+    },
+  );
 });
