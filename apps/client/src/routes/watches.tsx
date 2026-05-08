@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useWatches } from "@/gql/hooks/useWatches";
 import { useWatchRuns } from "@/gql/hooks/useWatchRuns";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -71,15 +72,28 @@ function WatchesPage() {
 
   if (watches.length === 0) {
     return (
-      <div className="text-center py-16">
-        <p className="text-muted-foreground">No watches yet.</p>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Watches</h1>
+          <Button asChild>
+            <Link to="/watches/new">New Watch</Link>
+          </Button>
+        </div>
+        <div className="text-center py-16">
+          <p className="text-muted-foreground">No watches yet.</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Watches</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Watches</h1>
+        <Button asChild>
+          <Link to="/watches/new">New Watch</Link>
+        </Button>
+      </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {watches.map((w) => (
           <WatchCard
