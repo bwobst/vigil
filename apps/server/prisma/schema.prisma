@@ -19,6 +19,12 @@ enum ConditionOperator {
   GREATER_THAN
 }
 
+enum RunStatus {
+  PASS
+  FAIL
+  ERROR
+}
+
 model Watch {
   id                  String            @id @default(uuid())
   name                String
@@ -31,5 +37,22 @@ model Watch {
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
 
+  watchRuns           WatchRun[]
+
   @@map("watches")
+}
+
+model WatchRun {
+  id             String    @id @default(uuid())
+  watchId        String
+  startedAt      DateTime
+  completedAt    DateTime
+  status         RunStatus
+  extractedValue String?
+  conditionMet   Boolean?
+  error          String?
+
+  watch          Watch     @relation(fields: [watchId], references: [id], onDelete: Cascade)
+
+  @@map("watch_runs")
 }
