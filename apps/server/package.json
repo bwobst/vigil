@@ -11,13 +11,21 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "echo 'no lint configured'",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
     "ci": "pnpm typecheck && pnpm test"
   },
   "dependencies": {
+    "@apollo/server": "^5.5.1",
+    "@nestjs/apollo": "^13.4.0",
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",
+    "@nestjs/graphql": "^13.4.0",
     "@nestjs/platform-express": "^11.0.0",
+    "@prisma/client": "^6.19.3",
     "cheerio": "^1.2.0",
+    "cron-parser": "^5.5.0",
+    "graphql": "^16.14.0",
     "jsonpath-plus": "^10.4.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
@@ -27,6 +35,7 @@
     "@nestjs/schematics": "^11.0.0",
     "@types/express": "^5.0.0",
     "@types/node": "^24.0.0",
+    "prisma": "^6.19.3",
     "typescript": "~5.7.0",
     "vitest": "^3.2.4"
   }
