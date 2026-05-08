@@ -47,4 +47,10 @@ await run({
       onSandboxReady: [{ command: "npm install" }],
     },
   },
+
+  // Sandcastle's built-in logging configuration. By default, all logs are printed
+  // to a file.
+  logging: {
+    type: "stdout",
+  }
 });
