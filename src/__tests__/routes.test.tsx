@@ -21,7 +21,7 @@ describe("App routing", () => {
     renderApp("/");
     await waitFor(() => {
       expect(
-        screen.getByRole("heading", { name: /welcome to sandcastle/i }),
+        screen.getByRole("heading", { name: /welcome to vigil/i }),
       ).toBeInTheDocument();
     });
   });
