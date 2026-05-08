@@ -1,7 +1,8 @@
 import "reflect-metadata";
 import { BadRequestException } from "@nestjs/common";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { PrismaService } from "../prisma/prisma.service";
+import { SchedulerService } from "../scheduler/scheduler.service";
 import { WatchService } from "./watch.service";
 import { ConditionOperator, ResponseType } from "./watch.types";
 
@@ -24,7 +25,11 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
   beforeAll(async () => {
     prisma = new PrismaService();
     await prisma.$connect();
-    service = new WatchService(prisma);
+    const mockScheduler = {
+      schedule: vi.fn().mockResolvedValue(undefined),
+      unschedule: vi.fn().mockResolvedValue(undefined),
+    } as unknown as SchedulerService;
+    service = new WatchService(prisma, mockScheduler);
   });
 
   afterAll(async () => {
