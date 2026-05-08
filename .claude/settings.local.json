@@ -4,12 +4,12 @@
       "Bash(npm install *)",
       "Bash(npm run *)",
       "Bash(npx vitest *)",
-      "Bash(gh repo *)",
-      "Bash(gh label *)",
-      "Bash(gh issue *)",
+      "Bash(gh *)",
       "Bash(git show *)",
-      "Bash(pnpm test *)",
-      "Bash(pnpm install *)"
+      "Bash(pnpm *)",
+      "Read(//Users/home/.agents/**)",
+      "Read(//Users/home/.claude/**)",
+      "Bash(grep -iA3 -E \"issue|tracker|triage\")"
     ]
   }
 }
