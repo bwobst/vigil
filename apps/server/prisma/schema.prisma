@@ -27,7 +27,7 @@ enum RunStatus {
 }
 
 model Watch {
-  id                  String            @id @default(uuid())
+  id                  String            @id @default(uuid(7))
   name                String
   targetUrl           String
   responseType        ResponseType
@@ -44,7 +44,7 @@ model Watch {
 }
 
 model WatchRun {
-  id             String    @id @default(uuid())
+  id             String    @id @default(uuid(7))
   watchId        String
   startedAt      DateTime
   completedAt    DateTime
