@@ -1,6 +1,6 @@
 # ADR 0003: NestJS + GraphQL (code-first) + Prisma as the server stack
 
-**Status**: Accepted  
+**Status**: Superseded by [ADR-0005](./0005-rest-api-replaces-graphql.md)  
 **Date**: 2026-05-07
 
 ## Context

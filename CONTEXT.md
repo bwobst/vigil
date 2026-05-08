@@ -25,15 +25,15 @@ The cron expression that determines how frequently a Watch runs. Defined per Wat
 Vigil is a pnpm workspaces monorepo with two packages:
 
 - **`apps/client`** — Vite + React 19 SPA, TanStack Router, shadcn/ui
-- **`apps/server`** — NestJS + TypeScript, GraphQL (code-first), Prisma, pg-boss
+- **`apps/server`** — NestJS + TypeScript, REST (`/api/*`), Prisma, pg-boss
 
-The client communicates with the server exclusively via GraphQL (`/graphql`). TanStack Query + `graphql-request` handle data fetching on the client. GraphQL Code Generator keeps client types in sync with the server schema.
+The client communicates with the server via a REST API under `/api/*`. TanStack Query wraps a small `fetch`-based client; request/response types are defined twice — once on the server as NestJS DTOs (with `class-validator` decorators) and once on the client as hand-written TypeScript types. Drift is managed manually.
 
 Postgres is the only datastore — used for both application data (via Prisma) and Watch scheduling/history (via pg-boss).
 
-Each Watch owns its Schedule. When a Watch runs, pg-boss records a Watch Run with the extracted value, condition result, and pass/fail status. The client can trigger a Watch off-schedule via a "run now" action.
+Each Watch owns its Schedule. When a Watch runs, pg-boss records a Watch Run with the extracted value, condition result, and pass/fail status. The client can trigger a Watch off-schedule via `POST /api/watches/:id/run`, which enqueues a pg-boss job and returns 202 — the same execution path as scheduled runs.
 
-In production, Caddy sits in front of both, routing `/graphql` to NestJS and all other traffic to the static Vite build. No CORS configuration required.
+In production, Caddy sits in front of both, routing `/api/*` to NestJS and all other traffic to the static Vite build. In dev, Vite proxies `/api/*` to NestJS so the client uses relative URLs in both environments. No CORS configuration required.
 
 ## UI System
 
