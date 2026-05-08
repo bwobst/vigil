@@ -5,10 +5,36 @@ services:
       POSTGRES_USER: vigil
       POSTGRES_PASSWORD: vigil
       POSTGRES_DB: vigil
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vigil -d vigil"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+  app-dev:
+    image: node:22-bookworm
+    working_dir: /workspace
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://vigil:vigil@postgres:5432/vigil?schema=public
+    ports:
+      - "3000:3000"
+      - "5173:5173"
+    volumes:
+      - .:/workspace
+      - pnpm_store:/pnpm/store
+    command: >
+      sh -c "corepack enable
+      && pnpm config set store-dir /pnpm/store
+      && CI=true pnpm install
+      && pnpm --filter server db:generate
+      && pnpm run dev"
 
 volumes:
   postgres_data:
+  pnpm_store:

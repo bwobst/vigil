@@ -18,7 +18,7 @@ export class CreateWatchInput {
   @Field(() => ConditionOperator)
   conditionOperator!: ConditionOperator;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   expectedValue?: string | null;
 
   @Field()
@@ -27,24 +27,24 @@ export class CreateWatchInput {
 
 @InputType()
 export class UpdateWatchInput {
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   name?: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   targetUrl?: string;
 
   @Field(() => ResponseType, { nullable: true })
   responseType?: ResponseType;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   extractorExpression?: string;
 
   @Field(() => ConditionOperator, { nullable: true })
   conditionOperator?: ConditionOperator;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   expectedValue?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   scheduleExpression?: string;
 }

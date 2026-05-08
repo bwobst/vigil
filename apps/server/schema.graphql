@@ -2,6 +2,28 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+enum ConditionOperator {
+  CHANGED
+  EQUALS
+  GREATER_THAN
+  LESS_THAN
+}
+
+input CreateWatchInput {
+  conditionOperator: ConditionOperator!
+  expectedValue: String
+  extractorExpression: String!
+  name: String!
+  responseType: ResponseType!
+  scheduleExpression: String!
+  targetUrl: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 type Mutation {
   createWatch(input: CreateWatchInput!): Watch!
   deleteWatch(id: ID!): ID!
@@ -16,14 +38,15 @@ type Query {
   watches: [Watch!]!
 }
 
-input CreateWatchInput {
-  conditionOperator: ConditionOperator!
-  expectedValue: String
-  extractorExpression: String!
-  name: String!
-  responseType: ResponseType!
-  scheduleExpression: String!
-  targetUrl: String!
+enum ResponseType {
+  HTML
+  JSON
+}
+
+enum RunStatus {
+  ERROR
+  FAIL
+  PASS
 }
 
 input UpdateWatchInput {
@@ -59,26 +82,3 @@ type WatchRun {
   status: RunStatus!
   watchId: ID!
 }
-
-enum ConditionOperator {
-  CHANGED
-  EQUALS
-  GREATER_THAN
-  LESS_THAN
-}
-
-enum ResponseType {
-  HTML
-  JSON
-}
-
-enum RunStatus {
-  ERROR
-  FAIL
-  PASS
-}
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime

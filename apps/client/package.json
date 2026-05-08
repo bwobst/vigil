@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "start:dev": "vite --host 0.0.0.0 --port 5173 --strictPort",
     "build": "pnpm codegen && tsc -b && vite build",
     "codegen": "graphql-codegen --config codegen.ts",
     "preview": "vite preview",

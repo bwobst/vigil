@@ -5,7 +5,16 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import { routeTree } from "./routeTree.gen";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      networkMode: "always",
+    },
+    mutations: {
+      networkMode: "always",
+    },
+  },
+});
 const router = createRouter({ routeTree });
 
 declare module "@tanstack/react-router" {

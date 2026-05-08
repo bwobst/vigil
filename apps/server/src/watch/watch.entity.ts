@@ -21,7 +21,7 @@ export class Watch {
   @Field(() => ConditionOperator)
   conditionOperator!: ConditionOperator;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   expectedValue?: string | null;
 
   @Field()

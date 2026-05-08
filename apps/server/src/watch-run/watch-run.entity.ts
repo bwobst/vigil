@@ -18,12 +18,12 @@ export class WatchRun {
   @Field(() => RunStatus)
   status!: RunStatus;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   extractedValue?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => Boolean, { nullable: true })
   conditionMet?: boolean | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   error?: string | null;
 }
