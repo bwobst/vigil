@@ -8,10 +8,10 @@ import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { routeTree } from "../routeTree.gen";
 import * as useWatchesModule from "../api/watches";
-import * as useWatchRunsModule from "../gql/hooks/useWatchRuns";
+import * as useWatchRunsModule from "../api/watchRuns";
 
 vi.mock("../api/watches");
-vi.mock("../gql/hooks/useWatchRuns");
+vi.mock("../api/watchRuns");
 
 const mockWatch = {
   id: "1",
@@ -63,7 +63,7 @@ describe("Edit Watch page", () => {
       isPending: false,
     } as any);
     vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
-      data: { watchRuns: [] },
+      data: [],
       isLoading: false,
     } as any);
     vi.mocked(useWatchesModule.useRunWatch).mockReturnValue({
@@ -209,7 +209,7 @@ describe("Delete Watch (detail page)", () => {
       isError: false,
     } as any);
     vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
-      data: { watchRuns: [] },
+      data: [],
       isLoading: false,
     } as any);
     vi.mocked(useWatchesModule.useRunWatch).mockReturnValue({

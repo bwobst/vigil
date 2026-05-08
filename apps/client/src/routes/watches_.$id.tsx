@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useWatch, useDeleteWatch, useRunWatch } from "@/api/watches";
-import { useWatchRuns } from "@/gql/hooks/useWatchRuns";
+import { useWatchRuns } from "@/api/watchRuns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,7 +43,7 @@ function WatchDetailPage() {
     return <p className="text-destructive">Watch not found.</p>;
   }
 
-  const runs = runsData?.watchRuns ?? [];
+  const runs = runsData ?? [];
 
   function handleDelete() {
     deleteWatch.mutate(id, {

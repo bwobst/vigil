@@ -10,6 +10,7 @@ import {
   Post,
 } from "@nestjs/common";
 import { SchedulerService } from "../scheduler/scheduler.service";
+import { WatchRunService } from "../watch-run/watch-run.service";
 import { CreateWatchDto, UpdateWatchDto } from "./watch.dto";
 import { WatchService } from "./watch.service";
 
@@ -18,6 +19,7 @@ export class WatchController {
   constructor(
     private readonly watchService: WatchService,
     private readonly schedulerService: SchedulerService,
+    private readonly watchRunService: WatchRunService,
   ) {}
 
   @Get()
@@ -54,5 +56,12 @@ export class WatchController {
     const watch = await this.watchService.findOne(id);
     if (!watch) throw new NotFoundException();
     void this.schedulerService.runNow(id);
+  }
+
+  @Get(":id/runs")
+  async runs(@Param("id") id: string) {
+    const watch = await this.watchService.findOne(id);
+    if (!watch) throw new NotFoundException();
+    return this.watchRunService.findByWatch(id);
   }
 }

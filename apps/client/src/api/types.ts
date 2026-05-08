@@ -1,3 +1,14 @@
+export interface WatchRun {
+  id: string;
+  watchId: string;
+  startedAt: string;
+  completedAt: string;
+  status: RunStatus;
+  extractedValue?: string | null;
+  conditionMet?: boolean | null;
+  error?: string | null;
+}
+
 export type ResponseType = "HTML" | "JSON";
 
 export type ConditionOperator = "EQUALS" | "CHANGED" | "LESS_THAN" | "GREATER_THAN";

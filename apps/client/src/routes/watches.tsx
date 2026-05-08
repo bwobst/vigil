@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useWatches } from "@/api/watches";
-import { useWatchRuns } from "@/gql/hooks/useWatchRuns";
+import { useWatchRuns } from "@/api/watchRuns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,7 +29,7 @@ function WatchCard({ id, name, targetUrl, scheduleExpression }: {
   scheduleExpression: string;
 }) {
   const { data } = useWatchRuns(id);
-  const latestRun = data?.watchRuns?.[0];
+  const latestRun = data?.[0];
 
   return (
     <Link to="/watches/$id" params={{ id }} className="block hover:no-underline">

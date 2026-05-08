@@ -8,10 +8,10 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { routeTree } from "../routeTree.gen";
 import * as useWatchesModule from "../api/watches";
-import * as useWatchRunsModule from "../gql/hooks/useWatchRuns";
+import * as useWatchRunsModule from "../api/watchRuns";
 
 vi.mock("../api/watches");
-vi.mock("../gql/hooks/useWatchRuns");
+vi.mock("../api/watchRuns");
 
 function renderApp(initialPath = "/watches") {
   const queryClient = new QueryClient({
@@ -123,20 +123,18 @@ describe("Watches list page", () => {
       isError: false,
     } as any);
     vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
-      data: {
-        watchRuns: [
-          {
-            id: "r1",
-            watchId: "1",
-            startedAt: "2024-01-01T00:00:00Z",
-            completedAt: "2024-01-01T00:00:05Z",
-            status: "PASS",
-            extractedValue: "foo",
-            conditionMet: true,
-            error: null,
-          },
-        ],
-      },
+      data: [
+        {
+          id: "r1",
+          watchId: "1",
+          startedAt: "2024-01-01T00:00:00Z",
+          completedAt: "2024-01-01T00:00:05Z",
+          status: "PASS",
+          extractedValue: "foo",
+          conditionMet: true,
+          error: null,
+        },
+      ],
       isLoading: false,
       isError: false,
     } as any);
