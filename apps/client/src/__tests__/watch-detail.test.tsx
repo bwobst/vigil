@@ -9,11 +9,9 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { routeTree } from "../routeTree.gen";
 import * as useWatchesModule from "../api/watches";
 import * as useWatchRunsModule from "../gql/hooks/useWatchRuns";
-import * as useRunWatchModule from "../gql/hooks/useRunWatch";
 
 vi.mock("../api/watches");
 vi.mock("../gql/hooks/useWatchRuns");
-vi.mock("../gql/hooks/useRunWatch");
 
 const mockWatch = {
   id: "1",
@@ -68,7 +66,7 @@ function renderApp(id = "1") {
 
 describe("Watch detail page", () => {
   beforeEach(() => {
-    vi.mocked(useRunWatchModule.useRunWatch).mockReturnValue({
+    vi.mocked(useWatchesModule.useRunWatch).mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
     } as any);
@@ -185,7 +183,7 @@ describe("Watch detail page", () => {
 
   it("calls runNow mutation when Run now button is clicked", async () => {
     const mutate = vi.fn();
-    vi.mocked(useRunWatchModule.useRunWatch).mockReturnValue({
+    vi.mocked(useWatchesModule.useRunWatch).mockReturnValue({
       mutate,
       isPending: false,
     } as any);
@@ -209,7 +207,7 @@ describe("Watch detail page", () => {
   });
 
   it("disables Run now button and shows loading text while running", async () => {
-    vi.mocked(useRunWatchModule.useRunWatch).mockReturnValue({
+    vi.mocked(useWatchesModule.useRunWatch).mockReturnValue({
       mutate: vi.fn(),
       isPending: true,
     } as any);

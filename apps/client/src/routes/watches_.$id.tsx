@@ -1,8 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useWatch, useDeleteWatch } from "@/api/watches";
+import { useWatch, useDeleteWatch, useRunWatch } from "@/api/watches";
 import { useWatchRuns } from "@/gql/hooks/useWatchRuns";
-import { useRunWatch } from "@/gql/hooks/useRunWatch";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

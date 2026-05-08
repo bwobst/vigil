@@ -9,12 +9,16 @@ import {
   Patch,
   Post,
 } from "@nestjs/common";
+import { SchedulerService } from "../scheduler/scheduler.service";
 import { CreateWatchDto, UpdateWatchDto } from "./watch.dto";
 import { WatchService } from "./watch.service";
 
 @Controller("watches")
 export class WatchController {
-  constructor(private readonly watchService: WatchService) {}
+  constructor(
+    private readonly watchService: WatchService,
+    private readonly schedulerService: SchedulerService,
+  ) {}
 
   @Get()
   findAll() {
@@ -42,5 +46,13 @@ export class WatchController {
   @HttpCode(204)
   async delete(@Param("id") id: string) {
     await this.watchService.delete(id);
+  }
+
+  @Post(":id/run")
+  @HttpCode(202)
+  async run(@Param("id") id: string) {
+    const watch = await this.watchService.findOne(id);
+    if (!watch) throw new NotFoundException();
+    void this.schedulerService.runNow(id);
   }
 }

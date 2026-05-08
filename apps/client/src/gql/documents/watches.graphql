@@ -74,16 +74,3 @@ query WatchRuns($watchId: ID!) {
     error
   }
 }
-
-mutation RunWatch($watchId: ID!) {
-  runWatch(watchId: $watchId) {
-    id
-    watchId
-    startedAt
-    completedAt
-    status
-    extractedValue
-    conditionMet
-    error
-  }
-}

@@ -50,3 +50,13 @@ export function useDeleteWatch() {
     },
   });
 }
+
+export function useRunWatch(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => apiFetch<void>(`/api/watches/${id}/run`, { method: "POST" }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["watch-runs", id] });
+    },
+  });
+}
