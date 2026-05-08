@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { apiFetch, apiFetchJson, ApiError } from "../api/client";
+import { apiFetch, apiFetchJson } from "../api/client";
 
 function mockResponse(status: number, body?: unknown, ok?: boolean) {
   const isOk = ok ?? (status >= 200 && status < 300);
@@ -33,9 +33,10 @@ describe("apiFetch", () => {
   it("throws ApiError with correct status on a non-2xx response", async () => {
     fetchMock.mockResolvedValueOnce(mockResponse(404, undefined, false));
 
-    const err = await apiFetch("/api/test").catch((e) => e);
-    expect(err).toBeInstanceOf(ApiError);
-    expect(err.status).toBe(404);
+    await expect(apiFetch("/api/test")).rejects.toMatchObject({
+      name: "ApiError",
+      status: 404,
+    });
   });
 
   it("ApiError carries server message field on 400 from ValidationPipe", async () => {
@@ -43,10 +44,11 @@ describe("apiFetch", () => {
       mockResponse(400, { message: "name must be a string" }, false),
     );
 
-    const err = await apiFetch("/api/test").catch((e) => e);
-    expect(err).toBeInstanceOf(ApiError);
-    expect(err.status).toBe(400);
-    expect(err.message).toBe("name must be a string");
+    await expect(apiFetch("/api/test")).rejects.toMatchObject({
+      name: "ApiError",
+      status: 400,
+      message: "name must be a string",
+    });
   });
 
   it("ApiError joins array message from ValidationPipe", async () => {
@@ -54,9 +56,10 @@ describe("apiFetch", () => {
       mockResponse(400, { message: ["name is required", "url must be a URL"] }, false),
     );
 
-    const err = await apiFetch("/api/test").catch((e) => e);
-    expect(err).toBeInstanceOf(ApiError);
-    expect(err.message).toBe("name is required; url must be a URL");
+    await expect(apiFetch("/api/test")).rejects.toMatchObject({
+      name: "ApiError",
+      message: "name is required; url must be a URL",
+    });
   });
 
   it("returns undefined on 202 without parsing body", async () => {
