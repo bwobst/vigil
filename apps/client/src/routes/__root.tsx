@@ -28,11 +28,6 @@ function RootComponent() {
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                  <Link to="/watches">Watches</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
                   <Link to="/about">About</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>

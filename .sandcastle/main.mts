@@ -34,7 +34,7 @@ await run({
 
   // Copy node_modules from the host into the worktree before the sandbox
   // starts. This avoids a full npm install from scratch on every iteration.
-  // The onSandboxReady hook still runs npm install as a safety net to handle
+  // The onSandboxReady hook still runs pnpm install as a safety net to handle
   // platform-specific binaries and any packages added since the last copy.
   copyToWorktree: ["node_modules"],
 
@@ -44,7 +44,12 @@ await run({
       // onSandboxReady runs once after the sandbox is initialised and the repo is
       // synced in, before the agent starts. Use it to install dependencies or run
       // any other setup steps your project needs.
-      onSandboxReady: [{ command: "pnpm install" }],
+      onSandboxReady: [
+        {
+          command: "CI=true pnpm install",
+          timeoutMs: 300_000,
+        },
+      ],
     },
   },
 

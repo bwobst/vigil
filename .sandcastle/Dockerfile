@@ -1,5 +1,8 @@
 FROM node:22-bookworm
 
+# Install pnpm globally so sandbox startup doesn't depend on Corepack downloads
+RUN npm install -g pnpm
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
   git \
