@@ -7,15 +7,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { routeTree } from "../routeTree.gen";
-import * as useWatchModule from "../gql/hooks/useWatch";
-import * as useUpdateWatchModule from "../gql/hooks/useUpdateWatch";
-import * as useDeleteWatchModule from "../gql/hooks/useDeleteWatch";
+import * as useWatchesModule from "../api/watches";
 import * as useWatchRunsModule from "../gql/hooks/useWatchRuns";
 import * as useRunWatchModule from "../gql/hooks/useRunWatch";
 
-vi.mock("../gql/hooks/useWatch");
-vi.mock("../gql/hooks/useUpdateWatch");
-vi.mock("../gql/hooks/useDeleteWatch");
+vi.mock("../api/watches");
 vi.mock("../gql/hooks/useWatchRuns");
 vi.mock("../gql/hooks/useRunWatch");
 
@@ -64,7 +60,7 @@ function renderDetailApp(id = "1") {
 
 describe("Edit Watch page", () => {
   beforeEach(() => {
-    vi.mocked(useUpdateWatchModule.useUpdateWatch).mockReturnValue({
+    vi.mocked(useWatchesModule.useUpdateWatch).mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: false,
     } as any);
@@ -76,14 +72,14 @@ describe("Edit Watch page", () => {
       mutate: vi.fn(),
       isPending: false,
     } as any);
-    vi.mocked(useDeleteWatchModule.useDeleteWatch).mockReturnValue({
+    vi.mocked(useWatchesModule.useDeleteWatch).mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
     } as any);
   });
 
   it("shows loading while watch is fetching", async () => {
-    vi.mocked(useWatchModule.useWatch).mockReturnValue({
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
       data: undefined,
       isLoading: true,
       isError: false,
@@ -96,8 +92,8 @@ describe("Edit Watch page", () => {
   });
 
   it("shows error when watch not found", async () => {
-    vi.mocked(useWatchModule.useWatch).mockReturnValue({
-      data: { watch: null },
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: null,
       isLoading: false,
       isError: false,
     } as any);
@@ -109,8 +105,8 @@ describe("Edit Watch page", () => {
   });
 
   it("pre-populates form with existing watch values", async () => {
-    vi.mocked(useWatchModule.useWatch).mockReturnValue({
-      data: { watch: mockWatch },
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: mockWatch,
       isLoading: false,
       isError: false,
     } as any);
@@ -126,9 +122,9 @@ describe("Edit Watch page", () => {
   });
 
   it("pre-populates expected value when watch uses EQUALS", async () => {
-    vi.mocked(useWatchModule.useWatch).mockReturnValue({
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
       data: {
-        watch: { ...mockWatch, conditionOperator: "EQUALS", expectedValue: "42" },
+        ...mockWatch, conditionOperator: "EQUALS", expectedValue: "42",
       },
       isLoading: false,
       isError: false,
@@ -142,13 +138,13 @@ describe("Edit Watch page", () => {
   });
 
   it("calls updateWatch mutation with correct values on submit", async () => {
-    const mutateAsync = vi.fn().mockResolvedValue({ updateWatch: mockWatch });
-    vi.mocked(useUpdateWatchModule.useUpdateWatch).mockReturnValue({
+    const mutateAsync = vi.fn().mockResolvedValue(mockWatch);
+    vi.mocked(useWatchesModule.useUpdateWatch).mockReturnValue({
       mutateAsync,
       isPending: false,
     } as any);
-    vi.mocked(useWatchModule.useWatch).mockReturnValue({
-      data: { watch: mockWatch },
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: mockWatch,
       isLoading: false,
       isError: false,
     } as any);
@@ -171,12 +167,12 @@ describe("Edit Watch page", () => {
 
   it("shows server error when update fails", async () => {
     const mutateAsync = vi.fn().mockRejectedValue(new Error("Invalid cron expression"));
-    vi.mocked(useUpdateWatchModule.useUpdateWatch).mockReturnValue({
+    vi.mocked(useWatchesModule.useUpdateWatch).mockReturnValue({
       mutateAsync,
       isPending: false,
     } as any);
-    vi.mocked(useWatchModule.useWatch).mockReturnValue({
-      data: { watch: mockWatch },
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: mockWatch,
       isLoading: false,
       isError: false,
     } as any);
@@ -194,8 +190,8 @@ describe("Edit Watch page", () => {
   });
 
   it("has a back link to the watch detail page", async () => {
-    vi.mocked(useWatchModule.useWatch).mockReturnValue({
-      data: { watch: mockWatch },
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: mockWatch,
       isLoading: false,
       isError: false,
     } as any);
@@ -209,8 +205,8 @@ describe("Edit Watch page", () => {
 
 describe("Delete Watch (detail page)", () => {
   beforeEach(() => {
-    vi.mocked(useWatchModule.useWatch).mockReturnValue({
-      data: { watch: mockWatch },
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: mockWatch,
       isLoading: false,
       isError: false,
     } as any);
@@ -222,14 +218,14 @@ describe("Delete Watch (detail page)", () => {
       mutate: vi.fn(),
       isPending: false,
     } as any);
-    vi.mocked(useUpdateWatchModule.useUpdateWatch).mockReturnValue({
+    vi.mocked(useWatchesModule.useUpdateWatch).mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: false,
     } as any);
   });
 
   it("shows a Delete button on the watch detail page", async () => {
-    vi.mocked(useDeleteWatchModule.useDeleteWatch).mockReturnValue({
+    vi.mocked(useWatchesModule.useDeleteWatch).mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
     } as any);
@@ -241,7 +237,7 @@ describe("Delete Watch (detail page)", () => {
   });
 
   it("shows confirmation buttons after clicking Delete", async () => {
-    vi.mocked(useDeleteWatchModule.useDeleteWatch).mockReturnValue({
+    vi.mocked(useWatchesModule.useDeleteWatch).mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
     } as any);
@@ -261,7 +257,7 @@ describe("Delete Watch (detail page)", () => {
 
   it("calls deleteWatch mutation on confirm", async () => {
     const mutate = vi.fn();
-    vi.mocked(useDeleteWatchModule.useDeleteWatch).mockReturnValue({
+    vi.mocked(useWatchesModule.useDeleteWatch).mockReturnValue({
       mutate,
       isPending: false,
     } as any);
@@ -281,7 +277,7 @@ describe("Delete Watch (detail page)", () => {
   });
 
   it("cancels deletion and hides confirmation when Cancel is clicked", async () => {
-    vi.mocked(useDeleteWatchModule.useDeleteWatch).mockReturnValue({
+    vi.mocked(useWatchesModule.useDeleteWatch).mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
     } as any);
@@ -304,7 +300,7 @@ describe("Delete Watch (detail page)", () => {
   });
 
   it("shows Edit link on the watch detail page", async () => {
-    vi.mocked(useDeleteWatchModule.useDeleteWatch).mockReturnValue({
+    vi.mocked(useWatchesModule.useDeleteWatch).mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
     } as any);

@@ -1,9 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useWatch } from "@/gql/hooks/useWatch";
+import { useWatch, useDeleteWatch } from "@/api/watches";
 import { useWatchRuns } from "@/gql/hooks/useWatchRuns";
 import { useRunWatch } from "@/gql/hooks/useRunWatch";
-import { useDeleteWatch } from "@/gql/hooks/useDeleteWatch";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { RunStatus } from "@/gql/generated/graphql";
+import type { RunStatus } from "@/api/types";
 
 export const Route = createFileRoute("/watches_/$id")({
   component: WatchDetailPage,
@@ -31,7 +30,7 @@ function formatDate(iso: string) {
 function WatchDetailPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { data: watchData, isLoading: watchLoading, isError: watchError } = useWatch(id);
+  const { data: watch, isLoading: watchLoading, isError: watchError } = useWatch(id);
   const { data: runsData, isLoading: runsLoading } = useWatchRuns(id);
   const runNow = useRunWatch(id);
   const deleteWatch = useDeleteWatch();
@@ -41,11 +40,10 @@ function WatchDetailPage() {
     return <p className="text-muted-foreground">Loading watch…</p>;
   }
 
-  if (watchError || !watchData?.watch) {
+  if (watchError || !watch) {
     return <p className="text-destructive">Watch not found.</p>;
   }
 
-  const watch = watchData.watch;
   const runs = runsData?.watchRuns ?? [];
 
   function handleDelete() {
@@ -172,7 +170,7 @@ function WatchDetailPage() {
                         {formatDate(run.completedAt)}
                       </td>
                       <td className="py-2 pr-4">
-                        <Badge variant={statusVariant(run.status)}>
+                        <Badge variant={statusVariant(run.status as RunStatus)}>
                           {run.status}
                         </Badge>
                       </td>

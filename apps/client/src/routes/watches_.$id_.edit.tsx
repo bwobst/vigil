@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { useWatch } from "@/gql/hooks/useWatch";
-import { useUpdateWatch } from "@/gql/hooks/useUpdateWatch";
+import { useWatch, useUpdateWatch } from "@/api/watches";
 import { WatchForm, type WatchFormValues } from "@/components/WatchForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -12,7 +11,7 @@ export const Route = createFileRoute("/watches_/$id_/edit")({
 function EditWatchPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { data, isLoading, isError } = useWatch(id);
+  const { data: watch, isLoading, isError } = useWatch(id);
   const updateWatch = useUpdateWatch();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -20,11 +19,9 @@ function EditWatchPage() {
     return <p className="text-muted-foreground">Loading watch…</p>;
   }
 
-  if (isError || !data?.watch) {
+  if (isError || !watch) {
     return <p className="text-destructive">Watch not found.</p>;
   }
-
-  const watch = data.watch;
 
   async function handleSubmit(values: WatchFormValues) {
     setServerError(null);

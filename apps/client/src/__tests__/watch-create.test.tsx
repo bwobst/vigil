@@ -7,9 +7,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { routeTree } from "../routeTree.gen";
-import * as useCreateWatchModule from "../gql/hooks/useCreateWatch";
+import * as useWatchesModule from "../api/watches";
 
-vi.mock("../gql/hooks/useCreateWatch");
+vi.mock("../api/watches");
 
 function renderApp(initialPath = "/watches/new") {
   const queryClient = new QueryClient({
@@ -28,7 +28,7 @@ function renderApp(initialPath = "/watches/new") {
 
 describe("Create Watch page", () => {
   beforeEach(() => {
-    vi.mocked(useCreateWatchModule.useCreateWatch).mockReturnValue({
+    vi.mocked(useWatchesModule.useCreateWatch).mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: false,
     } as any);
@@ -108,10 +108,8 @@ describe("Create Watch page", () => {
   });
 
   it("calls createWatch mutation with correct values on valid submit", async () => {
-    const mutateAsync = vi.fn().mockResolvedValue({
-      createWatch: { id: "42" },
-    });
-    vi.mocked(useCreateWatchModule.useCreateWatch).mockReturnValue({
+    const mutateAsync = vi.fn().mockResolvedValue({ id: "42" });
+    vi.mocked(useWatchesModule.useCreateWatch).mockReturnValue({
       mutateAsync,
       isPending: false,
     } as any);
@@ -135,8 +133,8 @@ describe("Create Watch page", () => {
     fireEvent.click(screen.getByRole("button", { name: /create watch/i }));
 
     await waitFor(() => {
-      expect(mutateAsync).toHaveBeenCalledWith({
-        input: expect.objectContaining({
+      expect(mutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
           name: "Price Watch",
           targetUrl: "https://shop.example.com",
           responseType: "HTML",
@@ -145,13 +143,13 @@ describe("Create Watch page", () => {
           expectedValue: null,
           scheduleExpression: "*/10 * * * *",
         }),
-      });
+      );
     });
   });
 
   it("shows server error when mutation fails", async () => {
     const mutateAsync = vi.fn().mockRejectedValue(new Error("Invalid cron expression"));
-    vi.mocked(useCreateWatchModule.useCreateWatch).mockReturnValue({
+    vi.mocked(useWatchesModule.useCreateWatch).mockReturnValue({
       mutateAsync,
       isPending: false,
     } as any);
@@ -180,7 +178,7 @@ describe("Create Watch page", () => {
   });
 
   it("disables buttons and shows saving state while pending", async () => {
-    vi.mocked(useCreateWatchModule.useCreateWatch).mockReturnValue({
+    vi.mocked(useWatchesModule.useCreateWatch).mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: true,
     } as any);

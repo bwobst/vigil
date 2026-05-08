@@ -2,9 +2,7 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { CronExpressionParser } from "cron-parser";
 import { PrismaService } from "../prisma/prisma.service";
 import { SchedulerService } from "../scheduler/scheduler.service";
-import type { CreateWatchInput, UpdateWatchInput } from "./watch.inputs";
-import type { Watch } from "./watch.entity";
-import { ConditionOperator } from "./watch.types";
+import { ConditionOperator, type CreateWatchDto, type UpdateWatchDto } from "./watch.dto";
 
 @Injectable()
 export class WatchService {
@@ -13,22 +11,22 @@ export class WatchService {
     private readonly scheduler: SchedulerService,
   ) {}
 
-  findAll(): Promise<Watch[]> {
-    return this.prisma.watch.findMany({ orderBy: { createdAt: "asc" } }) as Promise<Watch[]>;
+  findAll() {
+    return this.prisma.watch.findMany({ orderBy: { createdAt: "asc" } });
   }
 
-  findOne(id: string): Promise<Watch | null> {
-    return this.prisma.watch.findUnique({ where: { id } }) as Promise<Watch | null>;
+  findOne(id: string) {
+    return this.prisma.watch.findUnique({ where: { id } });
   }
 
-  async create(input: CreateWatchInput): Promise<Watch> {
+  async create(input: CreateWatchDto) {
     this.validateInput(input.scheduleExpression, input.conditionOperator, input.expectedValue ?? null);
     const watch = await this.prisma.watch.create({ data: input });
     await this.scheduler.schedule(watch);
-    return watch as Watch;
+    return watch;
   }
 
-  async update(id: string, input: UpdateWatchInput): Promise<Watch> {
+  async update(id: string, input: UpdateWatchDto) {
     const existing = await this.prisma.watch.findUniqueOrThrow({ where: { id } });
     const scheduleExpression = input.scheduleExpression ?? existing.scheduleExpression;
     const conditionOperator = (input.conditionOperator ?? existing.conditionOperator) as ConditionOperator;
@@ -36,7 +34,7 @@ export class WatchService {
     this.validateInput(scheduleExpression, conditionOperator, expectedValue);
     const watch = await this.prisma.watch.update({ where: { id }, data: input });
     await this.scheduler.schedule(watch);
-    return watch as Watch;
+    return watch;
   }
 
   async delete(id: string): Promise<string> {

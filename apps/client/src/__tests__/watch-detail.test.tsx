@@ -7,11 +7,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { routeTree } from "../routeTree.gen";
-import * as useWatchModule from "../gql/hooks/useWatch";
+import * as useWatchesModule from "../api/watches";
 import * as useWatchRunsModule from "../gql/hooks/useWatchRuns";
 import * as useRunWatchModule from "../gql/hooks/useRunWatch";
 
-vi.mock("../gql/hooks/useWatch");
+vi.mock("../api/watches");
 vi.mock("../gql/hooks/useWatchRuns");
 vi.mock("../gql/hooks/useRunWatch");
 
@@ -75,7 +75,7 @@ describe("Watch detail page", () => {
   });
 
   it("shows loading state while watch is fetching", async () => {
-    vi.mocked(useWatchModule.useWatch).mockReturnValue({
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
       data: undefined,
       isLoading: true,
       isError: false,
@@ -92,8 +92,8 @@ describe("Watch detail page", () => {
   });
 
   it("shows error state when watch not found", async () => {
-    vi.mocked(useWatchModule.useWatch).mockReturnValue({
-      data: { watch: null },
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: null,
       isLoading: false,
       isError: false,
     } as any);
@@ -109,8 +109,8 @@ describe("Watch detail page", () => {
   });
 
   it("displays watch configuration", async () => {
-    vi.mocked(useWatchModule.useWatch).mockReturnValue({
-      data: { watch: mockWatch },
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: mockWatch,
       isLoading: false,
       isError: false,
     } as any);
@@ -131,8 +131,8 @@ describe("Watch detail page", () => {
   });
 
   it("displays run history with status badges", async () => {
-    vi.mocked(useWatchModule.useWatch).mockReturnValue({
-      data: { watch: mockWatch },
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: mockWatch,
       isLoading: false,
       isError: false,
     } as any);
@@ -150,8 +150,8 @@ describe("Watch detail page", () => {
   });
 
   it("shows empty state when no runs", async () => {
-    vi.mocked(useWatchModule.useWatch).mockReturnValue({
-      data: { watch: mockWatch },
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: mockWatch,
       isLoading: false,
       isError: false,
     } as any);
@@ -167,8 +167,8 @@ describe("Watch detail page", () => {
   });
 
   it("shows loading state in run history section", async () => {
-    vi.mocked(useWatchModule.useWatch).mockReturnValue({
-      data: { watch: mockWatch },
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: mockWatch,
       isLoading: false,
       isError: false,
     } as any);
@@ -189,8 +189,8 @@ describe("Watch detail page", () => {
       mutate,
       isPending: false,
     } as any);
-    vi.mocked(useWatchModule.useWatch).mockReturnValue({
-      data: { watch: mockWatch },
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: mockWatch,
       isLoading: false,
       isError: false,
     } as any);
@@ -213,8 +213,8 @@ describe("Watch detail page", () => {
       mutate: vi.fn(),
       isPending: true,
     } as any);
-    vi.mocked(useWatchModule.useWatch).mockReturnValue({
-      data: { watch: mockWatch },
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: mockWatch,
       isLoading: false,
       isError: false,
     } as any);
@@ -232,10 +232,8 @@ describe("Watch detail page", () => {
   });
 
   it("shows expected value when condition is EQUALS", async () => {
-    vi.mocked(useWatchModule.useWatch).mockReturnValue({
-      data: {
-        watch: { ...mockWatch, conditionOperator: "EQUALS", expectedValue: "42" },
-      },
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: { ...mockWatch, conditionOperator: "EQUALS", expectedValue: "42" },
       isLoading: false,
       isError: false,
     } as any);
@@ -252,8 +250,8 @@ describe("Watch detail page", () => {
   });
 
   it("shows back link to watches list", async () => {
-    vi.mocked(useWatchModule.useWatch).mockReturnValue({
-      data: { watch: mockWatch },
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: mockWatch,
       isLoading: false,
       isError: false,
     } as any);

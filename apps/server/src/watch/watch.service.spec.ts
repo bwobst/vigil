@@ -4,7 +4,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import { PrismaService } from "../prisma/prisma.service";
 import { SchedulerService } from "../scheduler/scheduler.service";
 import { WatchService } from "./watch.service";
-import { ConditionOperator, ResponseType } from "./watch.types";
+import { ConditionOperator, ResponseType } from "./watch.dto";
 
 const hasDb = !!process.env["DATABASE_URL"];
 

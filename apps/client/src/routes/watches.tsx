@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useWatches } from "@/gql/hooks/useWatches";
+import { useWatches } from "@/api/watches";
 import { useWatchRuns } from "@/gql/hooks/useWatchRuns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { RunStatus } from "@/gql/generated/graphql";
+import type { RunStatus } from "@/api/types";
 
 export const Route = createFileRoute("/watches")({
   component: WatchesPage,
@@ -38,7 +38,7 @@ function WatchCard({ id, name, targetUrl, scheduleExpression }: {
           <div className="flex items-center justify-between">
             <CardTitle className="text-base">{name}</CardTitle>
             {latestRun ? (
-              <Badge variant={statusVariant(latestRun.status)}>
+              <Badge variant={statusVariant(latestRun.status as RunStatus)}>
                 {latestRun.status}
               </Badge>
             ) : (
@@ -68,7 +68,7 @@ function WatchesPage() {
     return <p className="text-destructive">Failed to load watches.</p>;
   }
 
-  const watches = data?.watches ?? [];
+  const watches = data ?? [];
 
   if (watches.length === 0) {
     return (

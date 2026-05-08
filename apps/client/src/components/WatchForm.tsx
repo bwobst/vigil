@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { ConditionOperator, ResponseType } from "@/gql/generated/graphql";
+import type { ConditionOperator, ResponseType } from "@/api/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

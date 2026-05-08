@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useCreateWatch } from "@/gql/hooks/useCreateWatch";
+import { useCreateWatch } from "@/api/watches";
 import { WatchForm, type WatchFormValues } from "@/components/WatchForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "@tanstack/react-router";
@@ -17,18 +17,16 @@ function CreateWatchPage() {
   async function handleSubmit(values: WatchFormValues) {
     setServerError(null);
     try {
-      const result = await createWatch.mutateAsync({
-        input: {
-          name: values.name,
-          targetUrl: values.targetUrl,
-          responseType: values.responseType,
-          extractorExpression: values.extractorExpression,
-          conditionOperator: values.conditionOperator,
-          expectedValue: values.conditionOperator === "EQUALS" ? values.expectedValue : null,
-          scheduleExpression: values.scheduleExpression,
-        },
+      const watch = await createWatch.mutateAsync({
+        name: values.name,
+        targetUrl: values.targetUrl,
+        responseType: values.responseType,
+        extractorExpression: values.extractorExpression,
+        conditionOperator: values.conditionOperator,
+        expectedValue: values.conditionOperator === "EQUALS" ? values.expectedValue : null,
+        scheduleExpression: values.scheduleExpression,
       });
-      void navigate({ to: "/watches/$id", params: { id: result.createWatch.id } });
+      void navigate({ to: "/watches/$id", params: { id: watch.id } });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to create watch";
       setServerError(message);

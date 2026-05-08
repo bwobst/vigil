@@ -3,7 +3,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { PrismaService } from "../prisma/prisma.service";
 import { WatchRunService } from "./watch-run.service";
 import { RunStatus } from "./watch-run.types";
-import { ResponseType, ConditionOperator } from "../watch/watch.types";
+import { ResponseType, ConditionOperator } from "../watch/watch.dto";
 
 const hasDb = !!process.env["DATABASE_URL"];
 

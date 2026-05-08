@@ -7,10 +7,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { routeTree } from "../routeTree.gen";
-import * as useWatchesModule from "../gql/hooks/useWatches";
+import * as useWatchesModule from "../api/watches";
 import * as useWatchRunsModule from "../gql/hooks/useWatchRuns";
 
-vi.mock("../gql/hooks/useWatches");
+vi.mock("../api/watches");
 vi.mock("../gql/hooks/useWatchRuns");
 
 function renderApp(initialPath = "/watches") {
@@ -65,7 +65,7 @@ describe("Watches list page", () => {
 
   it("shows empty state when no watches", async () => {
     vi.mocked(useWatchesModule.useWatches).mockReturnValue({
-      data: { watches: [] },
+      data: [],
       isLoading: false,
       isError: false,
     } as any);
@@ -78,22 +78,20 @@ describe("Watches list page", () => {
 
   it("renders watch cards with name and URL", async () => {
     vi.mocked(useWatchesModule.useWatches).mockReturnValue({
-      data: {
-        watches: [
-          {
-            id: "1",
-            name: "My Watch",
-            targetUrl: "https://example.com",
-            scheduleExpression: "*/5 * * * *",
-            responseType: "HTML",
-            extractorExpression: "h1",
-            conditionOperator: "CHANGED",
-            expectedValue: null,
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
-          },
-        ],
-      },
+      data: [
+        {
+          id: "1",
+          name: "My Watch",
+          targetUrl: "https://example.com",
+          scheduleExpression: "*/5 * * * *",
+          responseType: "HTML",
+          extractorExpression: "h1",
+          conditionOperator: "CHANGED",
+          expectedValue: null,
+          createdAt: "2024-01-01T00:00:00Z",
+          updatedAt: "2024-01-01T00:00:00Z",
+        },
+      ],
       isLoading: false,
       isError: false,
     } as any);
@@ -107,22 +105,20 @@ describe("Watches list page", () => {
 
   it("shows latest run status badge when run data available", async () => {
     vi.mocked(useWatchesModule.useWatches).mockReturnValue({
-      data: {
-        watches: [
-          {
-            id: "1",
-            name: "My Watch",
-            targetUrl: "https://example.com",
-            scheduleExpression: "*/5 * * * *",
-            responseType: "HTML",
-            extractorExpression: "h1",
-            conditionOperator: "CHANGED",
-            expectedValue: null,
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
-          },
-        ],
-      },
+      data: [
+        {
+          id: "1",
+          name: "My Watch",
+          targetUrl: "https://example.com",
+          scheduleExpression: "*/5 * * * *",
+          responseType: "HTML",
+          extractorExpression: "h1",
+          conditionOperator: "CHANGED",
+          expectedValue: null,
+          createdAt: "2024-01-01T00:00:00Z",
+          updatedAt: "2024-01-01T00:00:00Z",
+        },
+      ],
       isLoading: false,
       isError: false,
     } as any);
@@ -153,22 +149,20 @@ describe("Watches list page", () => {
 
   it("shows 'Never run' badge when no runs", async () => {
     vi.mocked(useWatchesModule.useWatches).mockReturnValue({
-      data: {
-        watches: [
-          {
-            id: "1",
-            name: "My Watch",
-            targetUrl: "https://example.com",
-            scheduleExpression: "*/5 * * * *",
-            responseType: "HTML",
-            extractorExpression: "h1",
-            conditionOperator: "CHANGED",
-            expectedValue: null,
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
-          },
-        ],
-      },
+      data: [
+        {
+          id: "1",
+          name: "My Watch",
+          targetUrl: "https://example.com",
+          scheduleExpression: "*/5 * * * *",
+          responseType: "HTML",
+          extractorExpression: "h1",
+          conditionOperator: "CHANGED",
+          expectedValue: null,
+          createdAt: "2024-01-01T00:00:00Z",
+          updatedAt: "2024-01-01T00:00:00Z",
+        },
+      ],
       isLoading: false,
       isError: false,
     } as any);
@@ -181,7 +175,7 @@ describe("Watches list page", () => {
 
   it("shows Watches nav link", async () => {
     vi.mocked(useWatchesModule.useWatches).mockReturnValue({
-      data: { watches: [] },
+      data: [],
       isLoading: false,
       isError: false,
     } as any);
