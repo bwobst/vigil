@@ -1,0 +1,84 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Mutation {
+  createWatch(input: CreateWatchInput!): Watch!
+  deleteWatch(id: ID!): ID!
+  runWatch(watchId: ID!): WatchRun!
+  updateWatch(id: ID!, input: UpdateWatchInput!): Watch!
+}
+
+type Query {
+  watch(id: ID!): Watch
+  watchRun(id: ID!): WatchRun
+  watchRuns(watchId: ID!): [WatchRun!]!
+  watches: [Watch!]!
+}
+
+input CreateWatchInput {
+  conditionOperator: ConditionOperator!
+  expectedValue: String
+  extractorExpression: String!
+  name: String!
+  responseType: ResponseType!
+  scheduleExpression: String!
+  targetUrl: String!
+}
+
+input UpdateWatchInput {
+  conditionOperator: ConditionOperator
+  expectedValue: String
+  extractorExpression: String
+  name: String
+  responseType: ResponseType
+  scheduleExpression: String
+  targetUrl: String
+}
+
+type Watch {
+  conditionOperator: ConditionOperator!
+  createdAt: DateTime!
+  expectedValue: String
+  extractorExpression: String!
+  id: ID!
+  name: String!
+  responseType: ResponseType!
+  scheduleExpression: String!
+  targetUrl: String!
+  updatedAt: DateTime!
+}
+
+type WatchRun {
+  completedAt: DateTime!
+  conditionMet: Boolean
+  error: String
+  extractedValue: String
+  id: ID!
+  startedAt: DateTime!
+  status: RunStatus!
+  watchId: ID!
+}
+
+enum ConditionOperator {
+  CHANGED
+  EQUALS
+  GREATER_THAN
+  LESS_THAN
+}
+
+enum ResponseType {
+  HTML
+  JSON
+}
+
+enum RunStatus {
+  ERROR
+  FAIL
+  PASS
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
