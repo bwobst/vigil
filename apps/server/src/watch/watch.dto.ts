@@ -38,7 +38,7 @@ export class CreateWatchDto {
   @IsString()
   expectedValue?: string | null;
 
-  @Matches(/^(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)$/, {
+  @Matches(/^(\*|[0-9,\-*\/]+)\s+(\*|[0-9,\-*\/]+)\s+(\*|[0-9,\-*\/]+)\s+(\*|[0-9,\-*\/]+)\s+(\*|[0-9,\-*\/]+)$/, {
     message: "scheduleExpression must be a valid cron expression",
   })
   scheduleExpression!: string;
@@ -70,7 +70,7 @@ export class UpdateWatchDto {
   expectedValue?: string | null;
 
   @IsOptional()
-  @Matches(/^(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)\s+(\*|[0-9,\-\/]+)$/, {
+  @Matches(/^(\*|[0-9,\-*\/]+)\s+(\*|[0-9,\-*\/]+)\s+(\*|[0-9,\-*\/]+)\s+(\*|[0-9,\-*\/]+)\s+(\*|[0-9,\-*\/]+)$/, {
     message: "scheduleExpression must be a valid cron expression",
   })
   scheduleExpression?: string;

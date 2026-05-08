@@ -23,6 +23,10 @@ Work on issues in this order:
 
 Pick the highest-priority open issue that is not blocked by another open issue.
 
+## Iteration (Sandcastle)
+
+Here, **one iteration** means one Sandcastle **agent run**: this prompt, one process, until you exit. Many tool calls and a long wall-clock session still count as a single iteration; Sandcastle only starts the next iteration when it launches you again with a fresh context block.
+
 ## Workflow
 
 1. **Explore** — read the issue carefully. Pull in the parent PRD if referenced. Read the relevant source files and tests before writing any code.
@@ -34,15 +38,15 @@ Pick the highest-priority open issue that is not blocked by another open issue.
    - Include the task completed and any PRD reference
    - List key decisions made
    - List files changed
-   - Note any blockers for the next iteration
+   - Note any blockers for the next Sandcastle run (next iteration)
 6. **Close** — close the issue with `gh issue close <ID> --comment "Completed by Sandcastle"` explaining what was done.
 
 ## Rules
 
-- Work on **one issue per iteration**. Do not attempt multiple issues in a single iteration.
+- Work on **exactly one GitHub issue per iteration** (per agent run, defined above). Do not fix, commit for, or close a second issue in the same run.
 - Do not close an issue until you have committed the fix and verified tests pass.
 - Do not leave commented-out code or TODO comments in committed code.
-- If you are blocked (missing context, failing tests you cannot fix, external dependency), leave a comment on the issue and move on — do not close it.
+- If you are blocked (missing context, failing tests you cannot fix, external dependency), leave a comment on the issue, do not close it, and **stop** — do not switch to another issue in this iteration.
 
 # Done
 
