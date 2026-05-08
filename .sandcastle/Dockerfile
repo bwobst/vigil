@@ -15,28 +15,21 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
   && apt-get update && apt-get install -y gh \
   && rm -rf /var/lib/apt/lists/*
 
-# Install GitLab CLI
-RUN echo "deb http://deb.debian.org/debian bookworm-backports main" \
-  | tee /etc/apt/sources.list.d/bookworm-backports.list > /dev/null \
-  && apt-get update && apt-get install -y -t bookworm-backports glab \
-  && rm -rf /var/lib/apt/lists/*
-
 # Rename the base image's "node" user (UID 1000) to "agent".
 # This keeps UID 1000 so that --userns=keep-id (Podman) and
 # --user 1000:1000 (Docker) map to the correct home directory owner.
-RUN groupmod -n agent node \
-  && usermod -d /home/agent -m -l agent node \
-  && chown -R agent:agent /home/agent \
-  && chmod -R a+rwX /home/agent
-
-# Install OpenCode CLI (run as root before USER agent)
-RUN npm install -g opencode-ai@latest
-
+RUN usermod -d /home/agent -m -l agent node
 USER agent
+
+# Install Claude Code CLI
+RUN curl -fsSL https://claude.ai/install.sh | bash
+
+# Add Claude to PATH
+ENV PATH="/home/agent/.local/bin:$PATH"
 
 WORKDIR /home/agent
 
-# In worktree sandbox mode, Sandcastle bind-mounts the git worktree at ${SANDBOX_REPO_DIR}
-# and overrides the working directory to ${SANDBOX_REPO_DIR} at container start.
-# Structure your Dockerfile so that ${SANDBOX_REPO_DIR} can serve as the project root.
+# In worktree sandbox mode, Sandcastle bind-mounts the git worktree at /home/agent/workspace
+# and overrides the working directory to /home/agent/workspace at container start.
+# Structure your Dockerfile so that /home/agent/workspace can serve as the project root.
 ENTRYPOINT ["sleep", "infinity"]
