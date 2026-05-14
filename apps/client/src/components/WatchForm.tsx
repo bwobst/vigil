@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { ConditionOperator, ResponseType } from "@/api/types";
+import { JsonPathPlayground } from "@/components/JsonPathPlayground";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -141,6 +142,10 @@ export function WatchForm({
           <p id="extractorExpression-error" className="text-sm text-destructive">{errors.extractorExpression}</p>
         )}
       </div>
+
+      {values.responseType === "JSON" && (
+        <JsonPathPlayground extractorExpression={values.extractorExpression} />
+      )}
 
       <div className="space-y-1.5">
         <Label htmlFor="conditionOperator">Condition operator</Label>
