@@ -10,6 +10,7 @@ import { routeTree } from "../routeTree.gen";
 import * as useWatchesModule from "../api/watches";
 import * as useWatchRunsModule from "../api/watchRuns";
 import * as sessionModule from "../api/session";
+import { ThemeProvider } from "../components/ThemeProvider";
 
 vi.mock("../api/watches");
 vi.mock("../api/watchRuns");
@@ -24,9 +25,11 @@ function renderApp(initialPath = "/watches") {
     history: createMemoryHistory({ initialEntries: [initialPath] }),
   });
   return render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>,
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </ThemeProvider>,
   );
 }
 

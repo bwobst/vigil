@@ -9,6 +9,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { routeTree } from "../routeTree.gen";
 import * as sessionModule from "../api/session";
 import { ApiError } from "../api/client";
+import { ThemeProvider } from "../components/ThemeProvider";
 
 vi.mock("../api/session");
 
@@ -21,9 +22,11 @@ function renderApp(initialPath = "/change-password") {
     history: createMemoryHistory({ initialEntries: [initialPath] }),
   });
   return render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>,
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </ThemeProvider>,
   );
 }
 

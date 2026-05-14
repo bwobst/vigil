@@ -9,6 +9,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { routeTree } from "../routeTree.gen";
 import * as useWatchesModule from "../api/watches";
 import * as sessionModule from "../api/session";
+import { ThemeProvider } from "../components/ThemeProvider";
 
 vi.mock("../api/watches");
 vi.mock("../api/session");
@@ -22,9 +23,11 @@ function renderApp(initialPath = "/watches/new") {
     history: createMemoryHistory({ initialEntries: [initialPath] }),
   });
   return render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>,
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </ThemeProvider>,
   );
 }
 

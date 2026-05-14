@@ -14,11 +14,12 @@
     "ci": "pnpm typecheck && pnpm test"
   },
   "dependencies": {
-    "@vigil/json-extractor": "workspace:*",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-navigation-menu": "^1.2.14",
     "@radix-ui/react-slot": "^1.2.4",
     "@tanstack/react-query": "^5.100.9",
     "@tanstack/react-router": "^1.131.27",
+    "@vigil/json-extractor": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.14.0",
@@ -32,6 +33,7 @@
     "@tanstack/router-plugin": "^1.131.27",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

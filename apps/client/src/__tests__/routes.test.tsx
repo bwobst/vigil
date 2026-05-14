@@ -8,6 +8,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { routeTree } from "../routeTree.gen";
 import * as sessionModule from "../api/session";
+import { ThemeProvider } from "../components/ThemeProvider";
 
 vi.mock("../api/session");
 
@@ -21,9 +22,11 @@ function renderApp(initialPath = "/") {
   });
 
   return render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>,
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </ThemeProvider>,
   );
 }
 

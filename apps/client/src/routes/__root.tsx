@@ -7,6 +7,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
+import { ThemeMenu } from "@/components/ThemeMenu";
 import { useSession, useSignOut } from "@/api/session";
 
 export const Route = createRootRoute({
@@ -52,22 +53,25 @@ function RootComponent() {
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
-          {session && (
-            <div className="ml-auto flex items-center gap-3">
-              <span className="text-sm text-muted-foreground">{session.email}</span>
-              <Link to="/change-password" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Change password
-              </Link>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSignOut}
-                disabled={signOut.isPending}
-              >
-                Sign out
-              </Button>
-            </div>
-          )}
+          <div className="ml-auto flex items-center gap-3">
+            {session && (
+              <>
+                <span className="text-sm text-muted-foreground">{session.email}</span>
+                <Link to="/change-password" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Change password
+                </Link>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSignOut}
+                  disabled={signOut.isPending}
+                >
+                  Sign out
+                </Button>
+              </>
+            )}
+            <ThemeMenu />
+          </div>
         </div>
       </header>
       <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
