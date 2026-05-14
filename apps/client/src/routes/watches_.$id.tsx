@@ -29,7 +29,7 @@ function WatchDetailPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const { data: watch, isLoading: watchLoading, isError: watchError } = useWatch(id);
-  const { data: runsData, isLoading: runsLoading } = useWatchRuns(id);
+  const { data: runsData, isLoading: runsLoading, isError: runsError } = useWatchRuns(id);
   const runNow = useRunWatch(id);
   const deleteWatch = useDeleteWatch();
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -144,49 +144,60 @@ function WatchDetailPage() {
         <CardContent>
           {runsLoading ? (
             <p className="text-muted-foreground text-sm">Loading runs…</p>
-          ) : runs.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No runs yet.</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left pb-2 font-medium">Started</th>
-                    <th className="text-left pb-2 font-medium">Completed</th>
-                    <th className="text-left pb-2 font-medium">Run</th>
-                    <th className="text-left pb-2 font-medium">Value</th>
-                    <th className="text-left pb-2 font-medium">Condition met</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {runs.map((run) => (
-                    <tr key={run.id} className="border-b last:border-0">
-                      <td className="py-2 pr-4 text-muted-foreground">
-                        {formatDate(run.startedAt)}
-                      </td>
-                      <td className="py-2 pr-4 text-muted-foreground">
-                        {formatDate(run.completedAt)}
-                      </td>
-                      <td className="py-2 pr-4">
-                        <Badge variant={statusVariant(run.status as RunStatus)}>
-                          {run.status}
-                        </Badge>
-                      </td>
-                      <td className="py-2 pr-4 font-mono">
-                        {run.extractedValue ?? "—"}
-                      </td>
-                      <td className="py-2">
-                        {run.conditionMet == null
-                          ? "—"
-                          : run.conditionMet
-                            ? "Yes"
-                            : "No"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <>
+              {runsError && (
+                <p className="text-destructive text-sm mb-3">
+                  Failed to refresh run history.
+                </p>
+              )}
+              {runs.length === 0 ? (
+                !runsError && (
+                  <p className="text-muted-foreground text-sm">No runs yet.</p>
+                )
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left pb-2 font-medium">Started</th>
+                        <th className="text-left pb-2 font-medium">Completed</th>
+                        <th className="text-left pb-2 font-medium">Run</th>
+                        <th className="text-left pb-2 font-medium">Value</th>
+                        <th className="text-left pb-2 font-medium">Condition met</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {runs.map((run) => (
+                        <tr key={run.id} className="border-b last:border-0">
+                          <td className="py-2 pr-4 text-muted-foreground">
+                            {formatDate(run.startedAt)}
+                          </td>
+                          <td className="py-2 pr-4 text-muted-foreground">
+                            {formatDate(run.completedAt)}
+                          </td>
+                          <td className="py-2 pr-4">
+                            <Badge variant={statusVariant(run.status as RunStatus)}>
+                              {run.status}
+                            </Badge>
+                          </td>
+                          <td className="py-2 pr-4 font-mono">
+                            {run.extractedValue ?? "—"}
+                          </td>
+                          <td className="py-2">
+                            {run.conditionMet == null
+                              ? "—"
+                              : run.conditionMet
+                                ? "Yes"
+                                : "No"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>

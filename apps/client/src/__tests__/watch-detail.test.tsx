@@ -255,11 +255,51 @@ describe("Watch detail page", () => {
     vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
       data: [],
       isLoading: false,
+      isError: false,
     } as any);
 
     renderApp();
     await waitFor(() => {
       expect(screen.getByRole("link", { name: /← watches/i })).toBeInTheDocument();
+    });
+  });
+
+  it("shows inline error when run history fetch fails with no prior data", async () => {
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: mockWatch,
+      isLoading: false,
+      isError: false,
+    } as any);
+    vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+    } as any);
+
+    renderApp();
+    await waitFor(() => {
+      expect(screen.getByText(/failed to refresh run history/i)).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/no runs yet/i)).not.toBeInTheDocument();
+  });
+
+  it("shows inline error and stale run list when run history fetch fails with prior data", async () => {
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: mockWatch,
+      isLoading: false,
+      isError: false,
+    } as any);
+    vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
+      data: mockRuns,
+      isLoading: false,
+      isError: true,
+    } as any);
+
+    renderApp();
+    await waitFor(() => {
+      expect(screen.getByText(/failed to refresh run history/i)).toBeInTheDocument();
+      expect(screen.getAllByText("PASS")).toHaveLength(2);
+      expect(screen.getByText("Hello World")).toBeInTheDocument();
     });
   });
 });

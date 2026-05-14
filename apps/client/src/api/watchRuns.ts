@@ -6,5 +6,7 @@ export function useWatchRuns(watchId: string) {
   return useQuery({
     queryKey: ["watch-runs", watchId],
     queryFn: () => apiFetch<WatchRun[]>(`/api/watches/${watchId}/runs`),
+    refetchInterval: 5000,
+    refetchIntervalInBackground: false,
   });
 }
