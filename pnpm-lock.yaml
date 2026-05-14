@@ -108,6 +108,9 @@ importers:
       '@prisma/client':
         specifier: ^6.19.3
         version: 6.19.3(prisma@6.19.3(typescript@5.7.3))(typescript@5.7.3)
+      '@vigil/json-extractor':
+        specifier: workspace:*
+        version: link:../../packages/json-extractor
       cheerio:
         specifier: ^1.2.0
         version: 1.2.0
@@ -148,6 +151,19 @@ importers:
       prisma:
         specifier: ^6.19.3
         version: 6.19.3(typescript@5.7.3)
+      typescript:
+        specifier: ~5.7.0
+        version: 5.7.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@24.12.2)(jiti@2.7.0)(jsdom@27.4.0)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.4)
+
+  packages/json-extractor:
+    dependencies:
+      jsonpath-plus:
+        specifier: ^10.4.0
+        version: 10.4.0
+    devDependencies:
       typescript:
         specifier: ~5.7.0
         version: 5.7.3

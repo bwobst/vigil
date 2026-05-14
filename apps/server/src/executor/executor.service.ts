@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import * as cheerio from "cheerio";
-import { JSONPath } from "jsonpath-plus";
+import { evaluateJsonPath } from "@vigil/json-extractor";
 import type {
   ConditionOperator,
   ExecuteOptions,
@@ -27,18 +27,22 @@ export class ExecutorService {
     }
 
     let extractedValue: string | null;
-    try {
-      if (watch.responseType === "HTML") {
+    if (watch.responseType === "HTML") {
+      try {
         extractedValue = extractFromHtml(responseText, watch.extractorExpression);
-      } else {
-        extractedValue = extractFromJson(responseText, watch.extractorExpression);
+      } catch (err) {
+        return {
+          extractedValue: null,
+          conditionMet: null,
+          error: err instanceof Error ? err.message : String(err),
+        };
       }
-    } catch (err) {
-      return {
-        extractedValue: null,
-        conditionMet: null,
-        error: err instanceof Error ? err.message : String(err),
-      };
+    } else {
+      const jsonResult = evaluateJsonPath(responseText, watch.extractorExpression);
+      if (jsonResult.error) {
+        return { extractedValue: null, conditionMet: null, error: jsonResult.error };
+      }
+      extractedValue = jsonResult.primary;
     }
 
     if (extractedValue === null) {
@@ -65,22 +69,6 @@ function extractFromHtml(html: string, selector: string): string | null {
   const el = $(selector).first();
   if (!el.length) return null;
   return el.text().trim();
-}
-
-function extractFromJson(json: string, path: string): string | null {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(json);
-  } catch {
-    throw new Error("Response is not valid JSON");
-  }
-  const results = JSONPath({
-    path,
-    json: parsed as object,
-    resultType: "value",
-  }) as unknown[];
-  if (!results.length) return null;
-  return String(results[0]);
 }
 
 function evaluateCondition(
