@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { CronExpressionParser } from "cron-parser";
 import { PrismaService } from "../prisma/prisma.service";
 import { SchedulerService } from "../scheduler/scheduler.service";
@@ -11,23 +11,24 @@ export class WatchService {
     private readonly scheduler: SchedulerService,
   ) {}
 
-  findAll() {
-    return this.prisma.watch.findMany({ orderBy: { createdAt: "asc" } });
+  findAll(userId: string) {
+    return this.prisma.watch.findMany({ where: { userId }, orderBy: { createdAt: "asc" } });
   }
 
-  findOne(id: string) {
-    return this.prisma.watch.findUnique({ where: { id } });
+  findOne(id: string, userId: string) {
+    return this.prisma.watch.findFirst({ where: { id, userId } });
   }
 
-  async create(input: CreateWatchDto) {
+  async create(input: CreateWatchDto, userId: string) {
     this.validateInput(input.scheduleExpression, input.conditionOperator, input.expectedValue ?? null);
-    const watch = await this.prisma.watch.create({ data: input });
+    const watch = await this.prisma.watch.create({ data: { ...input, userId } });
     await this.scheduler.schedule(watch);
     return watch;
   }
 
-  async update(id: string, input: UpdateWatchDto) {
-    const existing = await this.prisma.watch.findUniqueOrThrow({ where: { id } });
+  async update(id: string, userId: string, input: UpdateWatchDto) {
+    const existing = await this.prisma.watch.findFirst({ where: { id, userId } });
+    if (!existing) throw new NotFoundException();
     const scheduleExpression = input.scheduleExpression ?? existing.scheduleExpression;
     const conditionOperator = (input.conditionOperator ?? existing.conditionOperator) as ConditionOperator;
     const expectedValue = "expectedValue" in input ? (input.expectedValue ?? null) : (existing.expectedValue ?? null);
@@ -37,7 +38,9 @@ export class WatchService {
     return watch;
   }
 
-  async delete(id: string): Promise<string> {
+  async delete(id: string, userId: string): Promise<string> {
+    const existing = await this.prisma.watch.findFirst({ where: { id, userId } });
+    if (!existing) throw new NotFoundException();
     await this.scheduler.unschedule(id);
     await this.prisma.watch.delete({ where: { id } });
     return id;

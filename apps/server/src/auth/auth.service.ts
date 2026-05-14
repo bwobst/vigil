@@ -4,6 +4,8 @@ import { hashPassword, verifyPassword } from "../password/password-hash";
 import { normalizeEmail, validatePassword } from "../password/password-policy";
 import { RateLimiter } from "./rate-limiter";
 
+export const SESSION_COOKIE = "vigil_session";
+
 const DUMMY_HASH = "$2a$12$zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz..";
 
 export type SignInResult =
@@ -43,13 +45,13 @@ export class AuthService {
     await this.prisma.session.deleteMany({ where: { id: sessionId } });
   }
 
-  async getMe(sessionId: string): Promise<{ email: string } | null> {
+  async getMe(sessionId: string): Promise<{ email: string; id: string } | null> {
     const session = await this.prisma.session.findUnique({
       where: { id: sessionId },
       include: { user: true },
     });
     if (!session) return null;
-    return { email: session.user.email };
+    return { email: session.user.email, id: session.userId };
   }
 
   async changePassword(

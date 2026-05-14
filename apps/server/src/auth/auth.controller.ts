@@ -10,9 +10,7 @@ import {
 } from "@nestjs/common";
 import type { Request, Response } from "express";
 import { IsEmail, IsString, MinLength } from "class-validator";
-import { AuthService } from "./auth.service";
-
-const SESSION_COOKIE = "vigil_session";
+import { AuthService, SESSION_COOKIE } from "./auth.service";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,

@@ -1,8 +1,9 @@
 import "reflect-metadata";
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { PrismaService } from "../prisma/prisma.service";
 import { SchedulerService } from "../scheduler/scheduler.service";
+import { hashPassword } from "../password/password-hash";
 import { WatchService } from "./watch.service";
 import { ConditionOperator, ResponseType } from "./watch.dto";
 
@@ -21,6 +22,7 @@ const validInput = {
 describe.skipIf(!hasDb)("WatchService (integration)", () => {
   let prisma: PrismaService;
   let service: WatchService;
+  let userId: string;
 
   beforeAll(async () => {
     prisma = new PrismaService();
@@ -30,10 +32,15 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
       unschedule: vi.fn().mockResolvedValue(undefined),
     } as unknown as SchedulerService;
     service = new WatchService(prisma, mockScheduler);
+
+    const hashed = await hashPassword("Str0ng!Pass#12");
+    const user = await prisma.user.create({ data: { email: "watch-service-test@vigil.app", password: hashed } });
+    userId = user.id;
   });
 
   afterAll(async () => {
     await prisma.watch.deleteMany();
+    await prisma.user.deleteMany({ where: { id: userId } });
     await prisma.$disconnect();
   });
 
@@ -43,7 +50,7 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
 
   describe("create", () => {
     it("persists a new Watch and returns it", async () => {
-      const watch = await service.create(validInput);
+      const watch = await service.create(validInput, userId);
       expect(watch.id).toBeTruthy();
       expect(watch.name).toBe("Test Watch");
       expect(watch.targetUrl).toBe("https://example.com");
@@ -52,19 +59,20 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
       expect(watch.conditionOperator).toBe(ConditionOperator.EQUALS);
       expect(watch.expectedValue).toBe("Hello");
       expect(watch.scheduleExpression).toBe("*/5 * * * *");
+      expect(watch.userId).toBe(userId);
       expect(watch.createdAt).toBeInstanceOf(Date);
       expect(watch.updatedAt).toBeInstanceOf(Date);
     });
 
     it("rejects an invalid cron expression", async () => {
       await expect(
-        service.create({ ...validInput, scheduleExpression: "not-a-cron" }),
+        service.create({ ...validInput, scheduleExpression: "not-a-cron" }, userId),
       ).rejects.toThrow(BadRequestException);
     });
 
     it("rejects a schedule with less than 5-minute granularity", async () => {
       await expect(
-        service.create({ ...validInput, scheduleExpression: "* * * * *" }),
+        service.create({ ...validInput, scheduleExpression: "* * * * *" }, userId),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -74,7 +82,7 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
           ...validInput,
           conditionOperator: ConditionOperator.EQUALS,
           expectedValue: null,
-        }),
+        }, userId),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -83,7 +91,7 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
         ...validInput,
         conditionOperator: ConditionOperator.EQUALS,
         expectedValue: "some value",
-      });
+      }, userId);
       expect(watch.conditionOperator).toBe(ConditionOperator.EQUALS);
     });
 
@@ -92,7 +100,7 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
         ...validInput,
         conditionOperator: ConditionOperator.CHANGED,
         expectedValue: null,
-      });
+      }, userId);
       expect(watch.conditionOperator).toBe(ConditionOperator.CHANGED);
     });
 
@@ -102,7 +110,7 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
           ...validInput,
           conditionOperator: ConditionOperator.CHANGED,
           expectedValue: "some value",
-        }),
+        }, userId),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -112,7 +120,7 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
           ...validInput,
           conditionOperator: ConditionOperator.LESS_THAN,
           expectedValue: null,
-        }),
+        }, userId),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -122,7 +130,7 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
           ...validInput,
           conditionOperator: ConditionOperator.LESS_THAN,
           expectedValue: "not-a-number",
-        }),
+        }, userId),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -132,7 +140,7 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
           ...validInput,
           conditionOperator: ConditionOperator.LESS_THAN,
           expectedValue: "Infinity",
-        }),
+        }, userId),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -141,7 +149,7 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
         ...validInput,
         conditionOperator: ConditionOperator.LESS_THAN,
         expectedValue: "42",
-      });
+      }, userId);
       expect(watch.conditionOperator).toBe(ConditionOperator.LESS_THAN);
       expect(watch.expectedValue).toBe("42");
     });
@@ -151,7 +159,7 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
         ...validInput,
         conditionOperator: ConditionOperator.LESS_THAN,
         expectedValue: "1e3",
-      });
+      }, userId);
       expect(watch.conditionOperator).toBe(ConditionOperator.LESS_THAN);
     });
 
@@ -161,7 +169,7 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
           ...validInput,
           conditionOperator: ConditionOperator.GREATER_THAN,
           expectedValue: null,
-        }),
+        }, userId),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -171,7 +179,7 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
           ...validInput,
           conditionOperator: ConditionOperator.GREATER_THAN,
           expectedValue: "abc",
-        }),
+        }, userId),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -180,53 +188,73 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
         ...validInput,
         conditionOperator: ConditionOperator.GREATER_THAN,
         expectedValue: "100.5",
-      });
+      }, userId);
       expect(watch.conditionOperator).toBe(ConditionOperator.GREATER_THAN);
       expect(watch.expectedValue).toBe("100.5");
     });
   });
 
   describe("findAll", () => {
-    it("returns all Watches", async () => {
-      await service.create(validInput);
-      await service.create({ ...validInput, name: "Second Watch" });
-      const watches = await service.findAll();
+    it("returns only watches for the given user", async () => {
+      await service.create(validInput, userId);
+      await service.create({ ...validInput, name: "Second Watch" }, userId);
+      const watches = await service.findAll(userId);
       expect(watches).toHaveLength(2);
     });
 
-    it("returns empty array when no Watches exist", async () => {
-      const watches = await service.findAll();
+    it("returns empty array when no watches exist for user", async () => {
+      const watches = await service.findAll(userId);
       expect(watches).toHaveLength(0);
+    });
+
+    it("does not return another user's watches", async () => {
+      const otherUser = await prisma.user.create({
+        data: { email: "other-watch-service@vigil.app", password: "hash" },
+      });
+      await prisma.watch.create({ data: { ...validInput, userId: otherUser.id } });
+      const watches = await service.findAll(userId);
+      expect(watches).toHaveLength(0);
+      await prisma.user.delete({ where: { id: otherUser.id } });
     });
   });
 
   describe("findOne", () => {
-    it("returns a Watch by id", async () => {
-      const created = await service.create(validInput);
-      const found = await service.findOne(created.id);
+    it("returns a Watch by id for the owning user", async () => {
+      const created = await service.create(validInput, userId);
+      const found = await service.findOne(created.id, userId);
       expect(found).not.toBeNull();
       expect(found!.id).toBe(created.id);
     });
 
     it("returns null for a non-existent id", async () => {
-      const found = await service.findOne("00000000-0000-0000-0000-000000000000");
+      const found = await service.findOne("00000000-0000-0000-0000-000000000000", userId);
       expect(found).toBeNull();
+    });
+
+    it("returns null for a watch owned by another user", async () => {
+      const otherUser = await prisma.user.create({
+        data: { email: "other-watch-service2@vigil.app", password: "hash" },
+      });
+      const otherWatch = await prisma.watch.create({ data: { ...validInput, userId: otherUser.id } });
+      const found = await service.findOne(otherWatch.id, userId);
+      expect(found).toBeNull();
+      await prisma.user.delete({ where: { id: otherUser.id } });
     });
   });
 
   describe("update", () => {
     it("updates an existing Watch and returns it", async () => {
-      const created = await service.create(validInput);
-      const updated = await service.update(created.id, { name: "Updated Watch" });
+      const created = await service.create(validInput, userId);
+      const updated = await service.update(created.id, userId, { name: "Updated Watch" });
       expect(updated.id).toBe(created.id);
       expect(updated.name).toBe("Updated Watch");
       expect(updated.targetUrl).toBe(created.targetUrl);
     });
 
     it("rejects update with invalid cron expression", async () => {
-      const created = await service.create(validInput);
+      const created = await service.create(validInput, userId);
       await expect(
-        service.update(created.id, { scheduleExpression: "bad-cron" }),
+        service.update(created.id, userId, { scheduleExpression: "bad-cron" }),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -235,9 +263,9 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
         ...validInput,
         conditionOperator: ConditionOperator.CHANGED,
         expectedValue: null,
-      });
+      }, userId);
       await expect(
-        service.update(created.id, {
+        service.update(created.id, userId, {
           conditionOperator: ConditionOperator.EQUALS,
           expectedValue: null,
         }),
@@ -245,32 +273,54 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
     });
 
     it("rejects update that sets CHANGED while expectedValue remains non-null", async () => {
-      const created = await service.create(validInput);
+      const created = await service.create(validInput, userId);
       await expect(
-        service.update(created.id, {
+        service.update(created.id, userId, {
           conditionOperator: ConditionOperator.CHANGED,
         }),
       ).rejects.toThrow(BadRequestException);
     });
 
     it("accepts update to CHANGED when expectedValue is explicitly cleared", async () => {
-      const created = await service.create(validInput);
-      const updated = await service.update(created.id, {
+      const created = await service.create(validInput, userId);
+      const updated = await service.update(created.id, userId, {
         conditionOperator: ConditionOperator.CHANGED,
         expectedValue: null,
       });
       expect(updated.conditionOperator).toBe(ConditionOperator.CHANGED);
       expect(updated.expectedValue).toBeNull();
     });
+
+    it("throws NotFoundException when updating another user's watch", async () => {
+      const otherUser = await prisma.user.create({
+        data: { email: "other-watch-service3@vigil.app", password: "hash" },
+      });
+      const otherWatch = await prisma.watch.create({ data: { ...validInput, userId: otherUser.id } });
+      await expect(
+        service.update(otherWatch.id, userId, { name: "Hacked" }),
+      ).rejects.toThrow(NotFoundException);
+      await prisma.user.delete({ where: { id: otherUser.id } });
+    });
   });
 
   describe("delete", () => {
     it("removes a Watch and returns its id", async () => {
-      const created = await service.create(validInput);
-      const deletedId = await service.delete(created.id);
+      const created = await service.create(validInput, userId);
+      const deletedId = await service.delete(created.id, userId);
       expect(deletedId).toBe(created.id);
-      const found = await service.findOne(created.id);
+      const found = await service.findOne(created.id, userId);
       expect(found).toBeNull();
+    });
+
+    it("throws NotFoundException when deleting another user's watch", async () => {
+      const otherUser = await prisma.user.create({
+        data: { email: "other-watch-service4@vigil.app", password: "hash" },
+      });
+      const otherWatch = await prisma.watch.create({ data: { ...validInput, userId: otherUser.id } });
+      await expect(
+        service.delete(otherWatch.id, userId),
+      ).rejects.toThrow(NotFoundException);
+      await prisma.user.delete({ where: { id: otherUser.id } });
     });
   });
 });
@@ -280,7 +330,7 @@ describe("WatchService validation (unit)", () => {
 
   beforeEach(() => {
     const mockPrisma = {
-      watch: { findUniqueOrThrow: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn(), findMany: vi.fn(), findUnique: vi.fn() },
+      watch: { findFirst: vi.fn(), findUniqueOrThrow: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn(), findMany: vi.fn(), findUnique: vi.fn() },
     } as unknown as PrismaService;
     const mockScheduler = {
       schedule: vi.fn().mockResolvedValue(undefined),
@@ -300,39 +350,39 @@ describe("WatchService validation (unit)", () => {
   describe("LESS_THAN validation", () => {
     it("rejects when expectedValue is null", async () => {
       await expect(
-        service.create({ ...baseInput, conditionOperator: ConditionOperator.LESS_THAN, expectedValue: null }),
+        service.create({ ...baseInput, conditionOperator: ConditionOperator.LESS_THAN, expectedValue: null }, "user-id"),
       ).rejects.toThrow(BadRequestException);
     });
 
     it("rejects when expectedValue is non-numeric", async () => {
       await expect(
-        service.create({ ...baseInput, conditionOperator: ConditionOperator.LESS_THAN, expectedValue: "not-a-number" }),
+        service.create({ ...baseInput, conditionOperator: ConditionOperator.LESS_THAN, expectedValue: "not-a-number" }, "user-id"),
       ).rejects.toThrow(BadRequestException);
     });
 
     it("rejects Infinity", async () => {
       await expect(
-        service.create({ ...baseInput, conditionOperator: ConditionOperator.LESS_THAN, expectedValue: "Infinity" }),
+        service.create({ ...baseInput, conditionOperator: ConditionOperator.LESS_THAN, expectedValue: "Infinity" }, "user-id"),
       ).rejects.toThrow(BadRequestException);
     });
 
     it("rejects NaN", async () => {
       await expect(
-        service.create({ ...baseInput, conditionOperator: ConditionOperator.LESS_THAN, expectedValue: "NaN" }),
+        service.create({ ...baseInput, conditionOperator: ConditionOperator.LESS_THAN, expectedValue: "NaN" }, "user-id"),
       ).rejects.toThrow(BadRequestException);
     });
 
     it("accepts a plain integer", async () => {
       (service as unknown as { prisma: { watch: { create: ReturnType<typeof vi.fn> } } }).prisma.watch.create
-        .mockResolvedValueOnce({ ...baseInput, conditionOperator: "LESS_THAN", expectedValue: "42", id: "1", createdAt: new Date(), updatedAt: new Date() });
-      const watch = await service.create({ ...baseInput, conditionOperator: ConditionOperator.LESS_THAN, expectedValue: "42" });
+        .mockResolvedValueOnce({ ...baseInput, conditionOperator: "LESS_THAN", expectedValue: "42", id: "1", userId: "user-id", createdAt: new Date(), updatedAt: new Date() });
+      const watch = await service.create({ ...baseInput, conditionOperator: ConditionOperator.LESS_THAN, expectedValue: "42" }, "user-id");
       expect(watch.conditionOperator).toBe(ConditionOperator.LESS_THAN);
     });
 
     it("accepts scientific notation", async () => {
       (service as unknown as { prisma: { watch: { create: ReturnType<typeof vi.fn> } } }).prisma.watch.create
-        .mockResolvedValueOnce({ ...baseInput, conditionOperator: "LESS_THAN", expectedValue: "1e3", id: "1", createdAt: new Date(), updatedAt: new Date() });
-      const watch = await service.create({ ...baseInput, conditionOperator: ConditionOperator.LESS_THAN, expectedValue: "1e3" });
+        .mockResolvedValueOnce({ ...baseInput, conditionOperator: "LESS_THAN", expectedValue: "1e3", id: "1", userId: "user-id", createdAt: new Date(), updatedAt: new Date() });
+      const watch = await service.create({ ...baseInput, conditionOperator: ConditionOperator.LESS_THAN, expectedValue: "1e3" }, "user-id");
       expect(watch.conditionOperator).toBe(ConditionOperator.LESS_THAN);
     });
   });
@@ -340,20 +390,20 @@ describe("WatchService validation (unit)", () => {
   describe("GREATER_THAN validation", () => {
     it("rejects when expectedValue is null", async () => {
       await expect(
-        service.create({ ...baseInput, conditionOperator: ConditionOperator.GREATER_THAN, expectedValue: null }),
+        service.create({ ...baseInput, conditionOperator: ConditionOperator.GREATER_THAN, expectedValue: null }, "user-id"),
       ).rejects.toThrow(BadRequestException);
     });
 
     it("rejects when expectedValue is non-numeric", async () => {
       await expect(
-        service.create({ ...baseInput, conditionOperator: ConditionOperator.GREATER_THAN, expectedValue: "abc" }),
+        service.create({ ...baseInput, conditionOperator: ConditionOperator.GREATER_THAN, expectedValue: "abc" }, "user-id"),
       ).rejects.toThrow(BadRequestException);
     });
 
     it("accepts a decimal", async () => {
       (service as unknown as { prisma: { watch: { create: ReturnType<typeof vi.fn> } } }).prisma.watch.create
-        .mockResolvedValueOnce({ ...baseInput, conditionOperator: "GREATER_THAN", expectedValue: "3.14", id: "1", createdAt: new Date(), updatedAt: new Date() });
-      const watch = await service.create({ ...baseInput, conditionOperator: ConditionOperator.GREATER_THAN, expectedValue: "3.14" });
+        .mockResolvedValueOnce({ ...baseInput, conditionOperator: "GREATER_THAN", expectedValue: "3.14", id: "1", userId: "user-id", createdAt: new Date(), updatedAt: new Date() });
+      const watch = await service.create({ ...baseInput, conditionOperator: ConditionOperator.GREATER_THAN, expectedValue: "3.14" }, "user-id");
       expect(watch.conditionOperator).toBe(ConditionOperator.GREATER_THAN);
     });
   });
