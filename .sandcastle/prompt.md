@@ -2,7 +2,7 @@
 
 ## Open issues
 
-!`gh issue list --state open --label Sandcastle --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'`
+!`gh issue list --state open --label Sandcastle,needs-triage --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'`
 
 ## Recent RALPH commits (last 10)
 
@@ -39,7 +39,7 @@ Here, **one iteration** means one Sandcastle **agent run**: this prompt, one pro
    - List key decisions made
    - List files changed
    - Note any blockers for the next Sandcastle run (next iteration)
-6. **Close** — close the issue with `gh issue close <ID> --comment "Completed by Sandcastle"` explaining what was done.
+6. **Close** — close the issue with `gh issue close <ID> --comment "Completed by Sandcastle"` explaining what was done. Reference the commit in Github issue. Remove the "needs-triage" label from the Github issue.
 
 ## Rules
 

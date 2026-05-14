@@ -9,10 +9,10 @@ The central domain concept. A Watch is a user-configured unit of observation: a 
 The URL a Watch fetches — either a webpage (HTML) or an API endpoint (JSON).
 
 ### Extractor
-The rule that pulls a specific value out of a Target's response. For HTML Targets: a CSS selector. For JSON Targets: a JSONPath expression.
+The rule that pulls a specific value out of a Target's response. For HTML Targets: a CSS selector. For JSON Targets: a JSONPath expression. When configuring a JSON Watch in the client, the form includes a local evaluator: the user pastes sample JSON and sees the extracted value (and a secondary list when multiple nodes match), using the same first-match string extraction behavior as execution. Sample text is not persisted across reloads.
 
 ### Condition
-The comparison rule evaluated against the extracted value each time a Watch runs. Supported operators: equals, changed, less than, greater than. A Condition may reference a fixed expected value (equals "available") or compare against the previous run's value (changed, less than, greater than). When a Condition is met, the result is recorded in the Watch Run — no notification is sent. The user reviews results via the dashboard.
+The comparison rule evaluated against the extracted value each time a Watch runs. Supported operators: equals, changed, less than, greater than. **Equals**, **less than**, and **greater than** use a fixed **expected value** supplied by the user (string equality for equals; numeric threshold for less than / greater than — interpreted leniently as a floating-point literal, including scientific notation, with surrounding whitespace ignored; the threshold must be a **finite** number when the Watch is saved). **Changed** compares the current extracted value to the previous run's extracted value and does not use an expected value — **expected value must be null** when the operator is changed (non-null values are rejected when the Watch is saved). For less than and greater than, if the extracted value cannot be interpreted as a number at run time, the condition is **not met** (the run still succeeds; there is no error solely for non-numeric extraction). When a Condition is met, the result is recorded in the Watch Run — no notification is sent. The user reviews results via the dashboard.
 
 ### Watch Run
 A single execution instance of a Watch. Records start time, end time, pass/fail status, the extracted value, and whether the Condition was met. Stored in Postgres via pg-boss.
