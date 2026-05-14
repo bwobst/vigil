@@ -55,6 +55,9 @@ function RootComponent() {
           {session && (
             <div className="ml-auto flex items-center gap-3">
               <span className="text-sm text-muted-foreground">{session.email}</span>
+              <Link to="/change-password" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Change password
+              </Link>
               <Button
                 variant="outline"
                 size="sm"

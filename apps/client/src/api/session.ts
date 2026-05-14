@@ -34,3 +34,10 @@ export function useSignOut() {
     },
   });
 }
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: (data: { currentPassword: string; newPassword: string }) =>
+      apiFetchJson<void>("/api/auth/change-password", "POST", data),
+  });
+}
