@@ -5,6 +5,27 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sandcastle App</title>
+    <script>
+      (function () {
+        var k = "vigil-theme",
+          s;
+        try {
+          s = localStorage.getItem(k);
+        } catch (e) {}
+        if (s !== "light" && s !== "dark" && s !== "system") {
+          s = "system";
+          try {
+            localStorage.setItem(k, "system");
+          } catch (e) {}
+        }
+        var dark =
+          s === "dark" ||
+          (s === "system" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.classList.toggle("dark", dark);
+        document.documentElement.style.colorScheme = dark ? "dark" : "light";
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
