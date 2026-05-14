@@ -105,6 +105,85 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
         }),
       ).rejects.toThrow(BadRequestException);
     });
+
+    it("rejects LESS_THAN condition with no expectedValue", async () => {
+      await expect(
+        service.create({
+          ...validInput,
+          conditionOperator: ConditionOperator.LESS_THAN,
+          expectedValue: null,
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("rejects LESS_THAN condition with non-numeric expectedValue", async () => {
+      await expect(
+        service.create({
+          ...validInput,
+          conditionOperator: ConditionOperator.LESS_THAN,
+          expectedValue: "not-a-number",
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("rejects LESS_THAN condition with Infinity as expectedValue", async () => {
+      await expect(
+        service.create({
+          ...validInput,
+          conditionOperator: ConditionOperator.LESS_THAN,
+          expectedValue: "Infinity",
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("accepts LESS_THAN condition with a finite numeric expectedValue", async () => {
+      const watch = await service.create({
+        ...validInput,
+        conditionOperator: ConditionOperator.LESS_THAN,
+        expectedValue: "42",
+      });
+      expect(watch.conditionOperator).toBe(ConditionOperator.LESS_THAN);
+      expect(watch.expectedValue).toBe("42");
+    });
+
+    it("accepts LESS_THAN condition with scientific notation expectedValue", async () => {
+      const watch = await service.create({
+        ...validInput,
+        conditionOperator: ConditionOperator.LESS_THAN,
+        expectedValue: "1e3",
+      });
+      expect(watch.conditionOperator).toBe(ConditionOperator.LESS_THAN);
+    });
+
+    it("rejects GREATER_THAN condition with no expectedValue", async () => {
+      await expect(
+        service.create({
+          ...validInput,
+          conditionOperator: ConditionOperator.GREATER_THAN,
+          expectedValue: null,
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("rejects GREATER_THAN condition with non-numeric expectedValue", async () => {
+      await expect(
+        service.create({
+          ...validInput,
+          conditionOperator: ConditionOperator.GREATER_THAN,
+          expectedValue: "abc",
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("accepts GREATER_THAN condition with a finite numeric expectedValue", async () => {
+      const watch = await service.create({
+        ...validInput,
+        conditionOperator: ConditionOperator.GREATER_THAN,
+        expectedValue: "100.5",
+      });
+      expect(watch.conditionOperator).toBe(ConditionOperator.GREATER_THAN);
+      expect(watch.expectedValue).toBe("100.5");
+    });
   });
 
   describe("findAll", () => {
@@ -197,7 +276,85 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
 });
 
 describe("WatchService validation (unit)", () => {
-  it("does not require a database for validation logic", () => {
-    expect(true).toBe(true);
+  let service: WatchService;
+
+  beforeEach(() => {
+    const mockPrisma = {
+      watch: { findUniqueOrThrow: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn(), findMany: vi.fn(), findUnique: vi.fn() },
+    } as unknown as PrismaService;
+    const mockScheduler = {
+      schedule: vi.fn().mockResolvedValue(undefined),
+      unschedule: vi.fn().mockResolvedValue(undefined),
+    } as unknown as SchedulerService;
+    service = new WatchService(mockPrisma, mockScheduler);
+  });
+
+  const baseInput = {
+    name: "Test",
+    targetUrl: "https://example.com",
+    responseType: ResponseType.HTML,
+    extractorExpression: "h1",
+    scheduleExpression: "*/5 * * * *",
+  };
+
+  describe("LESS_THAN validation", () => {
+    it("rejects when expectedValue is null", async () => {
+      await expect(
+        service.create({ ...baseInput, conditionOperator: ConditionOperator.LESS_THAN, expectedValue: null }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("rejects when expectedValue is non-numeric", async () => {
+      await expect(
+        service.create({ ...baseInput, conditionOperator: ConditionOperator.LESS_THAN, expectedValue: "not-a-number" }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("rejects Infinity", async () => {
+      await expect(
+        service.create({ ...baseInput, conditionOperator: ConditionOperator.LESS_THAN, expectedValue: "Infinity" }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("rejects NaN", async () => {
+      await expect(
+        service.create({ ...baseInput, conditionOperator: ConditionOperator.LESS_THAN, expectedValue: "NaN" }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("accepts a plain integer", async () => {
+      (service as unknown as { prisma: { watch: { create: ReturnType<typeof vi.fn> } } }).prisma.watch.create
+        .mockResolvedValueOnce({ ...baseInput, conditionOperator: "LESS_THAN", expectedValue: "42", id: "1", createdAt: new Date(), updatedAt: new Date() });
+      const watch = await service.create({ ...baseInput, conditionOperator: ConditionOperator.LESS_THAN, expectedValue: "42" });
+      expect(watch.conditionOperator).toBe(ConditionOperator.LESS_THAN);
+    });
+
+    it("accepts scientific notation", async () => {
+      (service as unknown as { prisma: { watch: { create: ReturnType<typeof vi.fn> } } }).prisma.watch.create
+        .mockResolvedValueOnce({ ...baseInput, conditionOperator: "LESS_THAN", expectedValue: "1e3", id: "1", createdAt: new Date(), updatedAt: new Date() });
+      const watch = await service.create({ ...baseInput, conditionOperator: ConditionOperator.LESS_THAN, expectedValue: "1e3" });
+      expect(watch.conditionOperator).toBe(ConditionOperator.LESS_THAN);
+    });
+  });
+
+  describe("GREATER_THAN validation", () => {
+    it("rejects when expectedValue is null", async () => {
+      await expect(
+        service.create({ ...baseInput, conditionOperator: ConditionOperator.GREATER_THAN, expectedValue: null }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("rejects when expectedValue is non-numeric", async () => {
+      await expect(
+        service.create({ ...baseInput, conditionOperator: ConditionOperator.GREATER_THAN, expectedValue: "abc" }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("accepts a decimal", async () => {
+      (service as unknown as { prisma: { watch: { create: ReturnType<typeof vi.fn> } } }).prisma.watch.create
+        .mockResolvedValueOnce({ ...baseInput, conditionOperator: "GREATER_THAN", expectedValue: "3.14", id: "1", createdAt: new Date(), updatedAt: new Date() });
+      const watch = await service.create({ ...baseInput, conditionOperator: ConditionOperator.GREATER_THAN, expectedValue: "3.14" });
+      expect(watch.conditionOperator).toBe(ConditionOperator.GREATER_THAN);
+    });
   });
 });

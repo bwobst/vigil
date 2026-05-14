@@ -34,7 +34,7 @@ function EditWatchPage() {
           responseType: values.responseType,
           extractorExpression: values.extractorExpression,
           conditionOperator: values.conditionOperator,
-          expectedValue: values.conditionOperator === "EQUALS" ? values.expectedValue : null,
+          expectedValue: values.conditionOperator !== "CHANGED" ? values.expectedValue : null,
           scheduleExpression: values.scheduleExpression,
         },
       });

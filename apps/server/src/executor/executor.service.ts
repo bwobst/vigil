@@ -84,13 +84,13 @@ function evaluateCondition(
       return extractedValue !== previousValue;
     case "LESS_THAN": {
       const current = parseFloat(extractedValue);
-      const prev = parseFloat(previousValue ?? "");
-      return !isNaN(current) && !isNaN(prev) && current < prev;
+      const threshold = parseFloat(expectedValue ?? "");
+      return !isNaN(current) && !isNaN(threshold) && current < threshold;
     }
     case "GREATER_THAN": {
       const current = parseFloat(extractedValue);
-      const prev = parseFloat(previousValue ?? "");
-      return !isNaN(current) && !isNaN(prev) && current > prev;
+      const threshold = parseFloat(expectedValue ?? "");
+      return !isNaN(current) && !isNaN(threshold) && current > threshold;
     }
   }
 }

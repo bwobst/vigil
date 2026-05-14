@@ -199,41 +199,64 @@ describe("ExecutorService", () => {
     });
 
     describe("LESS_THAN", () => {
-      it("returns conditionMet true when extracted is less than previous", async () => {
+      it("returns conditionMet true when extracted is less than threshold", async () => {
         const result = await runWith("LESS_THAN", "30", {
-          previousExtractedValue: "50",
+          expectedValue: "50",
         });
         expect(result.conditionMet).toBe(true);
       });
 
-      it("returns conditionMet false when extracted is greater than previous", async () => {
+      it("returns conditionMet false when extracted is greater than threshold", async () => {
         const result = await runWith("LESS_THAN", "70", {
-          previousExtractedValue: "50",
+          expectedValue: "50",
         });
         expect(result.conditionMet).toBe(false);
       });
 
-      it("returns conditionMet false when extracted equals previous", async () => {
+      it("returns conditionMet false when extracted equals threshold", async () => {
         const result = await runWith("LESS_THAN", "50", {
-          previousExtractedValue: "50",
+          expectedValue: "50",
         });
         expect(result.conditionMet).toBe(false);
+      });
+
+      it("returns conditionMet false (not error) when extracted value is non-numeric", async () => {
+        const result = await runWith("LESS_THAN", "not-a-number", {
+          expectedValue: "50",
+        });
+        expect(result.conditionMet).toBe(false);
+        expect(result.error).toBeNull();
+      });
+
+      it("supports scientific notation in threshold", async () => {
+        const result = await runWith("LESS_THAN", "500", {
+          expectedValue: "1e3",
+        });
+        expect(result.conditionMet).toBe(true);
       });
     });
 
     describe("GREATER_THAN", () => {
-      it("returns conditionMet true when extracted is greater than previous", async () => {
+      it("returns conditionMet true when extracted is greater than threshold", async () => {
         const result = await runWith("GREATER_THAN", "70", {
-          previousExtractedValue: "50",
+          expectedValue: "50",
         });
         expect(result.conditionMet).toBe(true);
       });
 
-      it("returns conditionMet false when extracted is less than previous", async () => {
+      it("returns conditionMet false when extracted is less than threshold", async () => {
         const result = await runWith("GREATER_THAN", "30", {
-          previousExtractedValue: "50",
+          expectedValue: "50",
         });
         expect(result.conditionMet).toBe(false);
+      });
+
+      it("returns conditionMet false (not error) when extracted value is non-numeric", async () => {
+        const result = await runWith("GREATER_THAN", "not-a-number", {
+          expectedValue: "50",
+        });
+        expect(result.conditionMet).toBe(false);
+        expect(result.error).toBeNull();
       });
     });
   });

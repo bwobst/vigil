@@ -24,6 +24,13 @@ interface WatchFormProps {
   serverError?: string | null;
 }
 
+const NUMERIC_OPERATORS: ConditionOperator[] = ["LESS_THAN", "GREATER_THAN"];
+
+function isFiniteNumberString(s: string): boolean {
+  const trimmed = s.trim();
+  return trimmed !== "" && Number.isFinite(Number(trimmed));
+}
+
 function validate(values: WatchFormValues): Partial<Record<keyof WatchFormValues, string>> {
   const errors: Partial<Record<keyof WatchFormValues, string>> = {};
   if (!values.name.trim()) errors.name = "Name is required";
@@ -32,6 +39,13 @@ function validate(values: WatchFormValues): Partial<Record<keyof WatchFormValues
   if (!values.scheduleExpression.trim()) errors.scheduleExpression = "Schedule expression is required";
   if (values.conditionOperator === "EQUALS" && !values.expectedValue.trim()) {
     errors.expectedValue = "Expected value is required for EQUALS condition";
+  }
+  if (NUMERIC_OPERATORS.includes(values.conditionOperator)) {
+    if (!values.expectedValue.trim()) {
+      errors.expectedValue = "Numeric threshold is required";
+    } else if (!isFiniteNumberString(values.expectedValue)) {
+      errors.expectedValue = "Threshold must be a finite number (e.g. 42, 3.14, 1e3)";
+    }
   }
   return errors;
 }
@@ -133,7 +147,11 @@ export function WatchForm({
         <Select
           id="conditionOperator"
           value={values.conditionOperator}
-          onChange={(e) => set("conditionOperator", e.target.value as ConditionOperator)}
+          onChange={(e) => {
+            const op = e.target.value as ConditionOperator;
+            setValues((prev) => ({ ...prev, conditionOperator: op, expectedValue: op === "CHANGED" ? "" : prev.expectedValue }));
+            setErrors((prev) => ({ ...prev, conditionOperator: undefined, expectedValue: undefined }));
+          }}
         >
           <option value="CHANGED">CHANGED</option>
           <option value="EQUALS">EQUALS</option>
@@ -145,11 +163,32 @@ export function WatchForm({
       {values.conditionOperator === "EQUALS" && (
         <div className="space-y-1.5">
           <Label htmlFor="expectedValue">Expected value</Label>
+          <p className="text-sm text-muted-foreground">String equality — the extracted value must exactly match this text.</p>
           <Input
             id="expectedValue"
             value={values.expectedValue}
             onChange={(e) => set("expectedValue", e.target.value)}
             placeholder="Expected value"
+            className="font-mono"
+            aria-describedby={errors.expectedValue ? "expectedValue-error" : undefined}
+          />
+          {errors.expectedValue && (
+            <p id="expectedValue-error" className="text-sm text-destructive">{errors.expectedValue}</p>
+          )}
+        </div>
+      )}
+
+      {NUMERIC_OPERATORS.includes(values.conditionOperator) && (
+        <div className="space-y-1.5">
+          <Label htmlFor="expectedValue">Numeric threshold</Label>
+          <p className="text-sm text-muted-foreground">
+            The extracted value will be parsed as a number and compared to this threshold. Supports integers, decimals, and scientific notation (e.g. 1e3).
+          </p>
+          <Input
+            id="expectedValue"
+            value={values.expectedValue}
+            onChange={(e) => set("expectedValue", e.target.value)}
+            placeholder="e.g. 42 or 3.14 or 1e3"
             className="font-mono"
             aria-describedby={errors.expectedValue ? "expectedValue-error" : undefined}
           />

@@ -75,5 +75,21 @@ export class WatchService {
         "expectedValue must not be set when conditionOperator is CHANGED",
       );
     }
+
+    if (
+      conditionOperator === ConditionOperator.LESS_THAN ||
+      conditionOperator === ConditionOperator.GREATER_THAN
+    ) {
+      if (!expectedValue) {
+        throw new BadRequestException(
+          `expectedValue is required when conditionOperator is ${conditionOperator}`,
+        );
+      }
+      if (!Number.isFinite(Number(expectedValue.trim()))) {
+        throw new BadRequestException(
+          `expectedValue must be a finite number when conditionOperator is ${conditionOperator}`,
+        );
+      }
+    }
   }
 }
