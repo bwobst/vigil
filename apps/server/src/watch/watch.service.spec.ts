@@ -95,6 +95,16 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
       });
       expect(watch.conditionOperator).toBe(ConditionOperator.CHANGED);
     });
+
+    it("rejects CHANGED condition with a non-null expectedValue", async () => {
+      await expect(
+        service.create({
+          ...validInput,
+          conditionOperator: ConditionOperator.CHANGED,
+          expectedValue: "some value",
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
   });
 
   describe("findAll", () => {
@@ -153,6 +163,25 @@ describe.skipIf(!hasDb)("WatchService (integration)", () => {
           expectedValue: null,
         }),
       ).rejects.toThrow(BadRequestException);
+    });
+
+    it("rejects update that sets CHANGED while expectedValue remains non-null", async () => {
+      const created = await service.create(validInput);
+      await expect(
+        service.update(created.id, {
+          conditionOperator: ConditionOperator.CHANGED,
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("accepts update to CHANGED when expectedValue is explicitly cleared", async () => {
+      const created = await service.create(validInput);
+      const updated = await service.update(created.id, {
+        conditionOperator: ConditionOperator.CHANGED,
+        expectedValue: null,
+      });
+      expect(updated.conditionOperator).toBe(ConditionOperator.CHANGED);
+      expect(updated.expectedValue).toBeNull();
     });
   });
 

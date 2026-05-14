@@ -69,5 +69,11 @@ export class WatchService {
         "expectedValue is required when conditionOperator is EQUALS",
       );
     }
+
+    if (conditionOperator === ConditionOperator.CHANGED && expectedValue !== null) {
+      throw new BadRequestException(
+        "expectedValue must not be set when conditionOperator is CHANGED",
+      );
+    }
   }
 }
