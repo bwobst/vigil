@@ -9,7 +9,7 @@ export class ApiError extends Error {
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(path, init);
+  const res = await fetch(path, { credentials: "include", ...init });
 
   if (!res.ok) {
     let message = res.statusText;

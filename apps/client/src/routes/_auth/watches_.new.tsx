@@ -5,7 +5,7 @@ import { WatchForm, type WatchFormValues } from "@/components/WatchForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/watches_/new")({
+export const Route = createFileRoute("/_auth/watches_/new")({
   component: CreateWatchPage,
 });
 

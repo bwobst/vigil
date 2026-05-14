@@ -9,9 +9,11 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { routeTree } from "../routeTree.gen";
 import * as useWatchesModule from "../api/watches";
 import * as useWatchRunsModule from "../api/watchRuns";
+import * as sessionModule from "../api/session";
 
 vi.mock("../api/watches");
 vi.mock("../api/watchRuns");
+vi.mock("../api/session");
 
 function renderApp(initialPath = "/watches") {
   const queryClient = new QueryClient({
@@ -30,6 +32,15 @@ function renderApp(initialPath = "/watches") {
 
 describe("Watches list page", () => {
   beforeEach(() => {
+    vi.mocked(sessionModule.useSession).mockReturnValue({
+      data: { email: "user@example.com" },
+      isPending: false,
+      isError: false,
+    } as any);
+    vi.mocked(sessionModule.useSignOut).mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+    } as any);
     vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
       data: undefined,
       isLoading: false,

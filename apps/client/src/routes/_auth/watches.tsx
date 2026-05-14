@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import type { RunStatus } from "@/api/types";
 
-export const Route = createFileRoute("/watches")({
+export const Route = createFileRoute("/_auth/watches")({
   component: WatchesPage,
 });
 

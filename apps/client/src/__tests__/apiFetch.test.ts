@@ -98,6 +98,7 @@ describe("apiFetchJson", () => {
     await apiFetchJson("/api/test", "POST", { name: "Test" });
 
     expect(fetchMock).toHaveBeenCalledWith("/api/test", {
+      credentials: "include",
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: "Test" }),
@@ -110,6 +111,7 @@ describe("apiFetchJson", () => {
     await apiFetchJson("/api/test", "PATCH", { name: "Updated" });
 
     expect(fetchMock).toHaveBeenCalledWith("/api/test", {
+      credentials: "include",
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: "Updated" }),

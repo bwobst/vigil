@@ -9,9 +9,11 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { routeTree } from "../routeTree.gen";
 import * as useWatchesModule from "../api/watches";
 import * as useWatchRunsModule from "../api/watchRuns";
+import * as sessionModule from "../api/session";
 
 vi.mock("../api/watches");
 vi.mock("../api/watchRuns");
+vi.mock("../api/session");
 
 const mockWatch = {
   id: "1",
@@ -58,6 +60,15 @@ function renderDetailApp(id = "1") {
 
 describe("Edit Watch page", () => {
   beforeEach(() => {
+    vi.mocked(sessionModule.useSession).mockReturnValue({
+      data: { email: "user@example.com" },
+      isPending: false,
+      isError: false,
+    } as any);
+    vi.mocked(sessionModule.useSignOut).mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+    } as any);
     vi.mocked(useWatchesModule.useUpdateWatch).mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: false,
@@ -203,6 +214,15 @@ describe("Edit Watch page", () => {
 
 describe("Delete Watch (detail page)", () => {
   beforeEach(() => {
+    vi.mocked(sessionModule.useSession).mockReturnValue({
+      data: { email: "user@example.com" },
+      isPending: false,
+      isError: false,
+    } as any);
+    vi.mocked(sessionModule.useSignOut).mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+    } as any);
     vi.mocked(useWatchesModule.useWatch).mockReturnValue({
       data: mockWatch,
       isLoading: false,

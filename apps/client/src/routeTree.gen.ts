@@ -9,16 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WatchesRouteImport } from './routes/watches'
+import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as WatchesNewRouteImport } from './routes/watches_.new'
-import { Route as WatchesIdRouteImport } from './routes/watches_.$id'
-import { Route as WatchesIdEditRouteImport } from './routes/watches_.$id_.edit'
+import { Route as AuthWatchesRouteImport } from './routes/_auth/watches'
+import { Route as AuthWatchesNewRouteImport } from './routes/_auth/watches_.new'
+import { Route as AuthWatchesIdRouteImport } from './routes/_auth/watches_.$id'
+import { Route as AuthWatchesIdEditRouteImport } from './routes/_auth/watches_.$id_.edit'
 
-const WatchesRoute = WatchesRouteImport.update({
-  id: '/watches',
-  path: '/watches',
+const SignInRoute = SignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -26,57 +28,71 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/_auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WatchesNewRoute = WatchesNewRouteImport.update({
+const AuthWatchesRoute = AuthWatchesRouteImport.update({
+  id: '/watches',
+  path: '/watches',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthWatchesNewRoute = AuthWatchesNewRouteImport.update({
   id: '/watches_/new',
   path: '/watches/new',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthRoute,
 } as any)
-const WatchesIdRoute = WatchesIdRouteImport.update({
+const AuthWatchesIdRoute = AuthWatchesIdRouteImport.update({
   id: '/watches_/$id',
   path: '/watches/$id',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthRoute,
 } as any)
-const WatchesIdEditRoute = WatchesIdEditRouteImport.update({
+const AuthWatchesIdEditRoute = AuthWatchesIdEditRouteImport.update({
   id: '/watches_/$id_/edit',
   path: '/watches/$id/edit',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/watches': typeof WatchesRoute
-  '/watches/$id': typeof WatchesIdRoute
-  '/watches/new': typeof WatchesNewRoute
-  '/watches/$id/edit': typeof WatchesIdEditRoute
+  '/sign-in': typeof SignInRoute
+  '/watches': typeof AuthWatchesRoute
+  '/watches/$id': typeof AuthWatchesIdRoute
+  '/watches/new': typeof AuthWatchesNewRoute
+  '/watches/$id/edit': typeof AuthWatchesIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/watches': typeof WatchesRoute
-  '/watches/$id': typeof WatchesIdRoute
-  '/watches/new': typeof WatchesNewRoute
-  '/watches/$id/edit': typeof WatchesIdEditRoute
+  '/sign-in': typeof SignInRoute
+  '/watches': typeof AuthWatchesRoute
+  '/watches/$id': typeof AuthWatchesIdRoute
+  '/watches/new': typeof AuthWatchesNewRoute
+  '/watches/$id/edit': typeof AuthWatchesIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_auth': typeof AuthRouteWithChildren
   '/about': typeof AboutRoute
-  '/watches': typeof WatchesRoute
-  '/watches_/$id': typeof WatchesIdRoute
-  '/watches_/new': typeof WatchesNewRoute
-  '/watches_/$id_/edit': typeof WatchesIdEditRoute
+  '/sign-in': typeof SignInRoute
+  '/_auth/watches': typeof AuthWatchesRoute
+  '/_auth/watches_/$id': typeof AuthWatchesIdRoute
+  '/_auth/watches_/new': typeof AuthWatchesNewRoute
+  '/_auth/watches_/$id_/edit': typeof AuthWatchesIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
+    | '/sign-in'
     | '/watches'
     | '/watches/$id'
     | '/watches/new'
@@ -85,6 +101,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/sign-in'
     | '/watches'
     | '/watches/$id'
     | '/watches/new'
@@ -92,29 +109,29 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_auth'
     | '/about'
-    | '/watches'
-    | '/watches_/$id'
-    | '/watches_/new'
-    | '/watches_/$id_/edit'
+    | '/sign-in'
+    | '/_auth/watches'
+    | '/_auth/watches_/$id'
+    | '/_auth/watches_/new'
+    | '/_auth/watches_/$id_/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRouteWithChildren
   AboutRoute: typeof AboutRoute
-  WatchesRoute: typeof WatchesRoute
-  WatchesIdRoute: typeof WatchesIdRoute
-  WatchesNewRoute: typeof WatchesNewRoute
-  WatchesIdEditRoute: typeof WatchesIdEditRoute
+  SignInRoute: typeof SignInRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/watches': {
-      id: '/watches'
-      path: '/watches'
-      fullPath: '/watches'
-      preLoaderRoute: typeof WatchesRouteImport
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -124,6 +141,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -131,37 +155,58 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/watches_/new': {
-      id: '/watches_/new'
+    '/_auth/watches': {
+      id: '/_auth/watches'
+      path: '/watches'
+      fullPath: '/watches'
+      preLoaderRoute: typeof AuthWatchesRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/watches_/new': {
+      id: '/_auth/watches_/new'
       path: '/watches/new'
       fullPath: '/watches/new'
-      preLoaderRoute: typeof WatchesNewRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthWatchesNewRouteImport
+      parentRoute: typeof AuthRoute
     }
-    '/watches_/$id': {
-      id: '/watches_/$id'
+    '/_auth/watches_/$id': {
+      id: '/_auth/watches_/$id'
       path: '/watches/$id'
       fullPath: '/watches/$id'
-      preLoaderRoute: typeof WatchesIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthWatchesIdRouteImport
+      parentRoute: typeof AuthRoute
     }
-    '/watches_/$id_/edit': {
-      id: '/watches_/$id_/edit'
+    '/_auth/watches_/$id_/edit': {
+      id: '/_auth/watches_/$id_/edit'
       path: '/watches/$id/edit'
       fullPath: '/watches/$id/edit'
-      preLoaderRoute: typeof WatchesIdEditRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthWatchesIdEditRouteImport
+      parentRoute: typeof AuthRoute
     }
   }
 }
 
+interface AuthRouteChildren {
+  AuthWatchesRoute: typeof AuthWatchesRoute
+  AuthWatchesIdRoute: typeof AuthWatchesIdRoute
+  AuthWatchesNewRoute: typeof AuthWatchesNewRoute
+  AuthWatchesIdEditRoute: typeof AuthWatchesIdEditRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthWatchesRoute: AuthWatchesRoute,
+  AuthWatchesIdRoute: AuthWatchesIdRoute,
+  AuthWatchesNewRoute: AuthWatchesNewRoute,
+  AuthWatchesIdEditRoute: AuthWatchesIdEditRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRouteWithChildren,
   AboutRoute: AboutRoute,
-  WatchesRoute: WatchesRoute,
-  WatchesIdRoute: WatchesIdRoute,
-  WatchesNewRoute: WatchesNewRoute,
-  WatchesIdEditRoute: WatchesIdEditRoute,
+  SignInRoute: SignInRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

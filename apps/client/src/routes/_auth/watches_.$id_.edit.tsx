@@ -4,7 +4,7 @@ import { useWatch, useUpdateWatch } from "@/api/watches";
 import { WatchForm, type WatchFormValues } from "@/components/WatchForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export const Route = createFileRoute("/watches_/$id_/edit")({
+export const Route = createFileRoute("/_auth/watches_/$id_/edit")({
   component: EditWatchPage,
 });
 
