@@ -297,7 +297,7 @@ describe.skipIf(!hasDb)("Watch HTTP API (integration)", () => {
       expect(res.status).toBe(404);
     });
 
-    it("returns run history for the owning user", async () => {
+    it("returns { runs, totalCount } for the owning user", async () => {
       const created = await request(app.getHttpServer())
         .post("/api/watches")
         .set("Cookie", cookieA)
@@ -308,7 +308,57 @@ describe.skipIf(!hasDb)("Watch HTTP API (integration)", () => {
         .set("Cookie", cookieA);
 
       expect(res.status).toBe(200);
-      expect(Array.isArray(res.body)).toBe(true);
+      expect(Array.isArray(res.body.runs)).toBe(true);
+      expect(typeof res.body.totalCount).toBe("number");
+    });
+
+    it("defaults to page 1 when no page param given", async () => {
+      const created = await request(app.getHttpServer())
+        .post("/api/watches")
+        .set("Cookie", cookieA)
+        .send(validWatch);
+
+      const res = await request(app.getHttpServer())
+        .get(`/api/watches/${created.body.id}/runs`)
+        .set("Cookie", cookieA);
+
+      expect(res.status).toBe(200);
+      expect(res.body.runs).toHaveLength(0);
+      expect(res.body.totalCount).toBe(0);
+    });
+
+    it("returns empty runs with correct totalCount for a page beyond the last", async () => {
+      const created = await request(app.getHttpServer())
+        .post("/api/watches")
+        .set("Cookie", cookieA)
+        .send(validWatch);
+
+      const res = await request(app.getHttpServer())
+        .get(`/api/watches/${created.body.id}/runs?page=99`)
+        .set("Cookie", cookieA);
+
+      expect(res.status).toBe(200);
+      expect(res.body.runs).toHaveLength(0);
+      expect(res.body.totalCount).toBe(0);
+    });
+
+    it("normalizes page < 1 to page 1", async () => {
+      const created = await request(app.getHttpServer())
+        .post("/api/watches")
+        .set("Cookie", cookieA)
+        .send(validWatch);
+
+      const resNeg = await request(app.getHttpServer())
+        .get(`/api/watches/${created.body.id}/runs?page=0`)
+        .set("Cookie", cookieA);
+      expect(resNeg.status).toBe(200);
+      expect(resNeg.body.totalCount).toBe(0);
+
+      const resNaN = await request(app.getHttpServer())
+        .get(`/api/watches/${created.body.id}/runs?page=abc`)
+        .set("Cookie", cookieA);
+      expect(resNaN.status).toBe(200);
+      expect(resNaN.body.totalCount).toBe(0);
     });
   });
 });

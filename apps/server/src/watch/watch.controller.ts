@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UnauthorizedException,
 } from "@nestjs/common";
@@ -78,10 +79,15 @@ export class WatchController {
   }
 
   @Get(":id/runs")
-  async runs(@Param("id") id: string, @Req() req: Request) {
+  async runs(
+    @Param("id") id: string,
+    @Query("page") pageStr: string | undefined,
+    @Req() req: Request,
+  ) {
     const userId = await this.requireAuth(req);
     const watch = await this.watchService.findOne(id, userId);
     if (!watch) throw new NotFoundException();
-    return this.watchRunService.findByWatch(id);
+    const page = Math.max(1, Number.parseInt(pageStr ?? "1", 10) || 1);
+    return this.watchRunService.findByWatch(id, page);
   }
 }

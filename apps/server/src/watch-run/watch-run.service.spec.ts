@@ -104,7 +104,7 @@ describe.skipIf(!hasDb)("WatchRunService (integration)", () => {
   });
 
   describe("findByWatch", () => {
-    it("returns all runs for a Watch ordered by startedAt descending", async () => {
+    it("returns runs ordered by startedAt descending with totalCount", async () => {
       const t0 = new Date("2026-01-01T00:00:00Z");
       const t1 = new Date("2026-01-01T00:05:00Z");
       const t2 = new Date("2026-01-01T00:10:00Z");
@@ -112,16 +112,41 @@ describe.skipIf(!hasDb)("WatchRunService (integration)", () => {
       await service.recordRun(makeRunInput(watchId, { startedAt: t2, completedAt: new Date(t2.getTime() + 1000) }));
       await service.recordRun(makeRunInput(watchId, { startedAt: t1, completedAt: new Date(t1.getTime() + 1000) }));
 
-      const runs = await service.findByWatch(watchId);
-      expect(runs).toHaveLength(3);
-      expect(runs[0]!.startedAt).toEqual(t2);
-      expect(runs[1]!.startedAt).toEqual(t1);
-      expect(runs[2]!.startedAt).toEqual(t0);
+      const result = await service.findByWatch(watchId);
+      expect(result.runs).toHaveLength(3);
+      expect(result.totalCount).toBe(3);
+      expect(result.runs[0]!.startedAt).toEqual(t2);
+      expect(result.runs[1]!.startedAt).toEqual(t1);
+      expect(result.runs[2]!.startedAt).toEqual(t0);
     });
 
-    it("returns empty array when Watch has no runs", async () => {
-      const runs = await service.findByWatch(watchId);
-      expect(runs).toHaveLength(0);
+    it("returns empty runs array and totalCount 0 when Watch has no runs", async () => {
+      const result = await service.findByWatch(watchId);
+      expect(result.runs).toHaveLength(0);
+      expect(result.totalCount).toBe(0);
+    });
+
+    it("paginates correctly and returns accurate totalCount", async () => {
+      for (let i = 0; i < 25; i++) {
+        const t = new Date(Date.UTC(2026, 0, 1, 0, i, 0));
+        await service.recordRun(makeRunInput(watchId, { startedAt: t, completedAt: new Date(t.getTime() + 1000) }));
+      }
+
+      const page1 = await service.findByWatch(watchId, 1);
+      expect(page1.runs).toHaveLength(20);
+      expect(page1.totalCount).toBe(25);
+
+      const page2 = await service.findByWatch(watchId, 2);
+      expect(page2.runs).toHaveLength(5);
+      expect(page2.totalCount).toBe(25);
+    });
+
+    it("returns empty runs with correct totalCount for a page beyond the last", async () => {
+      await service.recordRun(makeRunInput(watchId));
+
+      const result = await service.findByWatch(watchId, 99);
+      expect(result.runs).toHaveLength(0);
+      expect(result.totalCount).toBe(1);
     });
   });
 

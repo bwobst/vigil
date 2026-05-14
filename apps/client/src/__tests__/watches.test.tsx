@@ -134,18 +134,21 @@ describe("Watches list page", () => {
       isError: false,
     } as any);
     vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
-      data: [
-        {
-          id: "r1",
-          watchId: "1",
-          startedAt: "2024-01-01T00:00:00Z",
-          completedAt: "2024-01-01T00:00:05Z",
-          status: "PASS",
-          extractedValue: "foo",
-          conditionMet: true,
-          error: null,
-        },
-      ],
+      data: {
+        runs: [
+          {
+            id: "r1",
+            watchId: "1",
+            startedAt: "2024-01-01T00:00:00Z",
+            completedAt: "2024-01-01T00:00:05Z",
+            status: "PASS",
+            extractedValue: "foo",
+            conditionMet: true,
+            error: null,
+          },
+        ],
+        totalCount: 1,
+      },
       isLoading: false,
       isError: false,
     } as any);

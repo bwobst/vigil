@@ -9,6 +9,11 @@ export interface WatchRun {
   error?: string | null;
 }
 
+export interface WatchRunsPage {
+  runs: WatchRun[];
+  totalCount: number;
+}
+
 export type ResponseType = "HTML" | "JSON";
 
 export type ConditionOperator = "EQUALS" | "CHANGED" | "LESS_THAN" | "GREATER_THAN";

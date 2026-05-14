@@ -38,7 +38,7 @@ function EditWatchPage() {
           scheduleExpression: values.scheduleExpression,
         },
       });
-      void navigate({ to: "/watches/$id", params: { id } });
+      void navigate({ to: "/watches/$id", params: { id }, search: { runsPage: 1 } });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to update watch";
       setServerError(message);
@@ -51,6 +51,7 @@ function EditWatchPage() {
         <Link
           to="/watches/$id"
           params={{ id }}
+          search={{ runsPage: 1 }}
           className="text-sm text-muted-foreground hover:text-foreground"
         >
           ← {watch.name}
@@ -75,7 +76,7 @@ function EditWatchPage() {
               scheduleExpression: watch.scheduleExpression,
             }}
             onSubmit={handleSubmit}
-            onCancel={() => void navigate({ to: "/watches/$id", params: { id } })}
+            onCancel={() => void navigate({ to: "/watches/$id", params: { id }, search: { runsPage: 1 } })}
             submitLabel="Save changes"
             isPending={updateWatch.isPending}
             serverError={serverError}

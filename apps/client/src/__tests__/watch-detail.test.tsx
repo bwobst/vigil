@@ -51,13 +51,13 @@ const mockRuns = [
   },
 ];
 
-function renderApp(id = "1") {
+function renderApp(path = "/watches/1") {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   const router = createRouter({
     routeTree,
-    history: createMemoryHistory({ initialEntries: [`/watches/${id}`] }),
+    history: createMemoryHistory({ initialEntries: [path] }),
   });
   return render(
     <QueryClientProvider client={queryClient}>
@@ -124,7 +124,7 @@ describe("Watch detail page", () => {
       isError: false,
     } as any);
     vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
-      data: [],
+      data: { runs: [], totalCount: 0 },
       isLoading: false,
     } as any);
 
@@ -146,7 +146,7 @@ describe("Watch detail page", () => {
       isError: false,
     } as any);
     vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
-      data: mockRuns,
+      data: { runs: mockRuns, totalCount: 2 },
       isLoading: false,
     } as any);
 
@@ -164,7 +164,7 @@ describe("Watch detail page", () => {
       isError: false,
     } as any);
     vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
-      data: [],
+      data: { runs: [], totalCount: 0 },
       isLoading: false,
     } as any);
 
@@ -203,7 +203,7 @@ describe("Watch detail page", () => {
       isError: false,
     } as any);
     vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
-      data: [],
+      data: { runs: [], totalCount: 0 },
       isLoading: false,
     } as any);
 
@@ -227,7 +227,7 @@ describe("Watch detail page", () => {
       isError: false,
     } as any);
     vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
-      data: [],
+      data: { runs: [], totalCount: 0 },
       isLoading: false,
     } as any);
 
@@ -246,7 +246,7 @@ describe("Watch detail page", () => {
       isError: false,
     } as any);
     vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
-      data: [],
+      data: { runs: [], totalCount: 0 },
       isLoading: false,
     } as any);
 
@@ -264,7 +264,7 @@ describe("Watch detail page", () => {
       isError: false,
     } as any);
     vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
-      data: [],
+      data: { runs: [], totalCount: 0 },
       isLoading: false,
       isError: false,
     } as any);
@@ -301,7 +301,7 @@ describe("Watch detail page", () => {
       isError: false,
     } as any);
     vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
-      data: mockRuns,
+      data: { runs: mockRuns, totalCount: 2 },
       isLoading: false,
       isError: true,
     } as any);
@@ -312,5 +312,76 @@ describe("Watch detail page", () => {
       expect(screen.getAllByText("PASS")).toHaveLength(2);
       expect(screen.getByText("Hello World")).toBeInTheDocument();
     });
+  });
+
+  it("shows pagination controls when totalCount > 0", async () => {
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: mockWatch,
+      isLoading: false,
+      isError: false,
+    } as any);
+    vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
+      data: { runs: mockRuns, totalCount: 2 },
+      isLoading: false,
+    } as any);
+
+    renderApp();
+    await waitFor(() => {
+      expect(screen.getByText(/page 1 of 1/i)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /previous/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /next/i })).toBeInTheDocument();
+    });
+  });
+
+  it("disables Previous button on first page", async () => {
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: mockWatch,
+      isLoading: false,
+      isError: false,
+    } as any);
+    vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
+      data: { runs: mockRuns, totalCount: 2 },
+      isLoading: false,
+    } as any);
+
+    renderApp();
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /previous/i })).toBeDisabled();
+    });
+  });
+
+  it("does not show pagination when there are no runs", async () => {
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: mockWatch,
+      isLoading: false,
+      isError: false,
+    } as any);
+    vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
+      data: { runs: [], totalCount: 0 },
+      isLoading: false,
+    } as any);
+
+    renderApp();
+    await waitFor(() => {
+      expect(screen.queryByRole("button", { name: /previous/i })).not.toBeInTheDocument();
+    });
+  });
+
+  it("passes page from URL search param to useWatchRuns", async () => {
+    vi.mocked(useWatchesModule.useWatch).mockReturnValue({
+      data: mockWatch,
+      isLoading: false,
+      isError: false,
+    } as any);
+    vi.mocked(useWatchRunsModule.useWatchRuns).mockReturnValue({
+      data: { runs: mockRuns, totalCount: 40 },
+      isLoading: false,
+    } as any);
+
+    renderApp("/watches/1?runsPage=2");
+    await waitFor(() => {
+      expect(screen.getByText(/page 2 of 2/i)).toBeInTheDocument();
+    });
+    expect(vi.mocked(useWatchRunsModule.useWatchRuns)).toHaveBeenCalledWith("1", 2);
   });
 });

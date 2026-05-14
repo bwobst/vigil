@@ -30,10 +30,17 @@ describe("useWatchRuns", () => {
     );
   });
 
-  it("uses watchId in query key", () => {
+  it("uses watchId and page in query key (defaults to page 1)", () => {
     renderHook(() => useWatchRuns("watch-abc"));
     expect(vi.mocked(useQuery)).toHaveBeenCalledWith(
-      expect.objectContaining({ queryKey: ["watch-runs", "watch-abc"] }),
+      expect.objectContaining({ queryKey: ["watch-runs", "watch-abc", 1] }),
+    );
+  });
+
+  it("includes page in query key when specified", () => {
+    renderHook(() => useWatchRuns("watch-abc", 3));
+    expect(vi.mocked(useQuery)).toHaveBeenCalledWith(
+      expect.objectContaining({ queryKey: ["watch-runs", "watch-abc", 3] }),
     );
   });
 });

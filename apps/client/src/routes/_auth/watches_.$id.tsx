@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useWatch, useDeleteWatch, useRunWatch } from "@/api/watches";
-import { useWatchRuns } from "@/api/watchRuns";
+import { useWatchRuns, RUNS_PAGE_SIZE } from "@/api/watchRuns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,9 @@ import {
 import type { RunStatus } from "@/api/types";
 
 export const Route = createFileRoute("/_auth/watches_/$id")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    runsPage: Math.max(1, Number(search["runsPage"]) || 1),
+  }),
   component: WatchDetailPage,
 });
 
@@ -27,12 +30,23 @@ function formatDate(iso: string) {
 
 function WatchDetailPage() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
+  const { runsPage } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
   const { data: watch, isLoading: watchLoading, isError: watchError } = useWatch(id);
-  const { data: runsData, isLoading: runsLoading, isError: runsError } = useWatchRuns(id);
+  const { data: runsData, isLoading: runsLoading, isError: runsError } = useWatchRuns(id, runsPage);
   const runNow = useRunWatch(id);
   const deleteWatch = useDeleteWatch();
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const runs = runsData?.runs ?? [];
+  const totalCount = runsData?.totalCount ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / RUNS_PAGE_SIZE));
+
+  useEffect(() => {
+    if (runsData && runs.length === 0 && totalCount > 0 && runsPage > totalPages) {
+      void navigate({ search: { runsPage: totalPages } });
+    }
+  }, [runsData, runs.length, totalCount, runsPage, totalPages, navigate]);
 
   if (watchLoading) {
     return <p className="text-muted-foreground">Loading watch…</p>;
@@ -41,8 +55,6 @@ function WatchDetailPage() {
   if (watchError || !watch) {
     return <p className="text-destructive">Watch not found.</p>;
   }
-
-  const runs = runsData ?? [];
 
   function handleDelete() {
     deleteWatch.mutate(id, {
@@ -195,6 +207,31 @@ function WatchDetailPage() {
                       ))}
                     </tbody>
                   </table>
+                </div>
+              )}
+              {totalCount > 0 && (
+                <div className="flex items-center justify-between mt-4">
+                  <span className="text-sm text-muted-foreground">
+                    Page {runsPage} of {totalPages}
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={runsPage <= 1}
+                      onClick={() => void navigate({ search: { runsPage: runsPage - 1 } })}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={runsPage >= totalPages}
+                      onClick={() => void navigate({ search: { runsPage: runsPage + 1 } })}
+                    >
+                      Next
+                    </Button>
+                  </div>
                 </div>
               )}
             </>

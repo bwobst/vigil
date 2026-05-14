@@ -3,6 +3,8 @@ import { PrismaService } from "../prisma/prisma.service";
 import type { WatchRun } from "./watch-run.entity";
 import type { RunStatus } from "./watch-run.types";
 
+export const RUNS_PAGE_SIZE = 20;
+
 export interface RecordRunInput {
   watchId: string;
   startedAt: Date;
@@ -13,15 +15,27 @@ export interface RecordRunInput {
   error: string | null;
 }
 
+export interface WatchRunsPage {
+  runs: WatchRun[];
+  totalCount: number;
+}
+
 @Injectable()
 export class WatchRunService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findByWatch(watchId: string): Promise<WatchRun[]> {
-    return this.prisma.watchRun.findMany({
-      where: { watchId },
-      orderBy: { startedAt: "desc" },
-    }) as Promise<WatchRun[]>;
+  async findByWatch(watchId: string, page = 1): Promise<WatchRunsPage> {
+    const skip = (page - 1) * RUNS_PAGE_SIZE;
+    const [runs, totalCount] = await Promise.all([
+      this.prisma.watchRun.findMany({
+        where: { watchId },
+        orderBy: { startedAt: "desc" },
+        skip,
+        take: RUNS_PAGE_SIZE,
+      }),
+      this.prisma.watchRun.count({ where: { watchId } }),
+    ]);
+    return { runs: runs as WatchRun[], totalCount };
   }
 
   findOne(id: string): Promise<WatchRun | null> {

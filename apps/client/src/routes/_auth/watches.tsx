@@ -28,10 +28,10 @@ function WatchCard({ id, name, targetUrl, scheduleExpression }: {
   scheduleExpression: string;
 }) {
   const { data } = useWatchRuns(id);
-  const latestRun = data?.[0];
+  const latestRun = data?.runs[0];
 
   return (
-    <Link to="/watches/$id" params={{ id }} className="block hover:no-underline">
+    <Link to="/watches/$id" params={{ id }} search={{ runsPage: 1 }} className="block hover:no-underline">
       <Card className="hover:shadow-md transition-shadow cursor-pointer">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">

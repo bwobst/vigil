@@ -26,7 +26,7 @@ function CreateWatchPage() {
         expectedValue: values.conditionOperator !== "CHANGED" ? values.expectedValue : null,
         scheduleExpression: values.scheduleExpression,
       });
-      void navigate({ to: "/watches/$id", params: { id: watch.id } });
+      void navigate({ to: "/watches/$id", params: { id: watch.id }, search: { runsPage: 1 } });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to create watch";
       setServerError(message);
