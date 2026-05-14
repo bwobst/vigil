@@ -8,10 +8,12 @@ import type { WatchRun } from "../watch-run/watch-run.entity";
 
 interface WatchJobData {
   watchId: string;
+  userId: string | null;
 }
 
 type WatchRecord = {
   id: string;
+  userId: string | null;
   targetUrl: string;
   responseType: string;
   extractorExpression: string;
@@ -74,14 +76,29 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
   private async registerWatch(watch: WatchRecord) {
     if (!this.boss) return;
     const queueName = this.queueName(watch.id);
-    await this.boss.schedule(queueName, watch.scheduleExpression, { watchId: watch.id });
+    await this.boss.schedule(queueName, watch.scheduleExpression, { watchId: watch.id, userId: watch.userId });
     await this.boss.work<WatchJobData>(queueName, async (job: PgBoss.Job<WatchJobData>) => {
-      await this.executeAndRecord(job.data.watchId);
+      await this.executeIfOwned(job.data.watchId, job.data.userId ?? null);
     });
   }
 
   private queueName(watchId: string): string {
     return `watch:${watchId}`;
+  }
+
+  private async executeIfOwned(watchId: string, expectedUserId: string | null): Promise<void> {
+    const watch = await this.prisma.watch.findUnique({ where: { id: watchId } });
+    if (!watch) {
+      this.logger.warn(`Scheduled job skipped: watch ${watchId} not found`);
+      return;
+    }
+    if (expectedUserId !== null && watch.userId !== null && expectedUserId !== watch.userId) {
+      this.logger.error(
+        `Tenant mismatch: job expected userId=${expectedUserId} but watch ${watchId} belongs to ${watch.userId} — skipping`,
+      );
+      return;
+    }
+    await this.executeAndRecord(watchId);
   }
 
   private async executeAndRecord(watchId: string): Promise<WatchRun> {
