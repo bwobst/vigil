@@ -25,8 +25,8 @@ function RootComponent() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <header className="border-b bg-white">
+    <div className="min-h-screen bg-background">
+      <header className="border-b bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex h-14 items-center gap-6">
           <Link to="/" className="text-lg font-bold text-emerald-600">
             Vigil
