@@ -16,11 +16,12 @@
     "ci": "pnpm typecheck && pnpm test"
   },
   "dependencies": {
-    "@vigil/json-extractor": "workspace:*",
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
     "@prisma/client": "^6.19.3",
+    "@vigil/json-extractor": "workspace:*",
+    "bcryptjs": "^3.0.3",
     "cheerio": "^1.2.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
@@ -33,6 +34,7 @@
   "devDependencies": {
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
+    "@types/bcryptjs": "^3.0.0",
     "@types/express": "^5.0.0",
     "@types/node": "^24.0.0",
     "prisma": "^6.19.3",
