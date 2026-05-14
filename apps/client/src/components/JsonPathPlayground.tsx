@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { evaluateJsonPath } from "@vigil/json-extractor";
+import { evaluateJsonPath, formatJsonPathValue } from "@vigil/json-extractor";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -92,7 +92,9 @@ function PreviewReadout({ preview }: { preview: PreviewState }) {
   return (
     <div className="space-y-2" aria-live="polite">
       <p className="text-xs text-muted-foreground">Primary value (used by executor):</p>
-      <p className="text-sm font-mono bg-muted rounded px-2 py-1 break-all">{preview.primary}</p>
+      <p className="text-sm font-mono bg-muted rounded px-2 py-1 break-all whitespace-pre-wrap">
+        {preview.primary}
+      </p>
       {preview.all.length > 1 && (
         <details>
           <summary className="text-xs text-muted-foreground cursor-pointer select-none">
@@ -100,8 +102,8 @@ function PreviewReadout({ preview }: { preview: PreviewState }) {
           </summary>
           <ul className="mt-1 space-y-1" aria-label="All matches">
             {preview.all.map((v, i) => (
-              <li key={i} className="text-xs font-mono bg-muted rounded px-2 py-0.5 break-all">
-                {String(v)}
+              <li key={i} className="text-xs font-mono bg-muted rounded px-2 py-0.5 break-all whitespace-pre-wrap">
+                {formatJsonPathValue(v)}
               </li>
             ))}
           </ul>

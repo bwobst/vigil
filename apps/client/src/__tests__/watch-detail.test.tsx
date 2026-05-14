@@ -42,7 +42,7 @@ const mockRuns = [
     watchId: "1",
     startedAt: "2024-01-01T10:00:00Z",
     completedAt: "2024-01-01T10:00:05Z",
-    status: "FAIL" as const,
+    status: "PASS" as const,
     extractedValue: "Old Value",
     conditionMet: false,
     error: null,
@@ -141,8 +141,7 @@ describe("Watch detail page", () => {
 
     renderApp();
     await waitFor(() => {
-      expect(screen.getByText("PASS")).toBeInTheDocument();
-      expect(screen.getByText("FAIL")).toBeInTheDocument();
+      expect(screen.getAllByText("PASS")).toHaveLength(2);
       expect(screen.getByText("Hello World")).toBeInTheDocument();
     });
   });

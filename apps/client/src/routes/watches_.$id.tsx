@@ -18,7 +18,6 @@ export const Route = createFileRoute("/watches_/$id")({
 
 function statusVariant(status: RunStatus) {
   if (status === "PASS") return "pass";
-  if (status === "FAIL") return "fail";
   return "error";
 }
 
@@ -154,9 +153,9 @@ function WatchDetailPage() {
                   <tr className="border-b">
                     <th className="text-left pb-2 font-medium">Started</th>
                     <th className="text-left pb-2 font-medium">Completed</th>
-                    <th className="text-left pb-2 font-medium">Status</th>
+                    <th className="text-left pb-2 font-medium">Run</th>
                     <th className="text-left pb-2 font-medium">Value</th>
-                    <th className="text-left pb-2 font-medium">Match</th>
+                    <th className="text-left pb-2 font-medium">Condition met</th>
                   </tr>
                 </thead>
                 <tbody>

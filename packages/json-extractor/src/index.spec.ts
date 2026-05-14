@@ -26,6 +26,20 @@ describe("evaluateJsonPath", () => {
       expect(result.allValues).toEqual([10, 20, 30]);
       expect(result.primary).toBe("10");
     });
+
+    it("returns pretty-printed JSON for an object match", () => {
+      const result = evaluateJsonPath(JSON_TEXT, "$.data");
+      expect(result.error).toBeNull();
+      expect(result.primary).toBe(
+        ['{', '  "price": 42000,', '  "label": "BTC/USD"', '}'].join('\n'),
+      );
+    });
+
+    it("returns pretty-printed JSON for an array match", () => {
+      const result = evaluateJsonPath(JSON_TEXT, "$.items");
+      expect(result.error).toBeNull();
+      expect(result.primary).toBe(['[', '  10,', '  20,', '  30', ']'].join('\n'));
+    });
   });
 
   describe("no match", () => {

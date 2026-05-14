@@ -78,14 +78,14 @@ describe.skipIf(!hasDb)("WatchRunService (integration)", () => {
       expect(run.error).toBeNull();
     });
 
-    it("persists a FAIL run and returns it", async () => {
+    it("persists a successful run with condition not met", async () => {
       const run = await service.recordRun(makeRunInput(watchId, {
-        status: RunStatus.FAIL,
+        status: RunStatus.PASS,
         extractedValue: "99",
         conditionMet: false,
         error: null,
       }));
-      expect(run.status).toBe(RunStatus.FAIL);
+      expect(run.status).toBe(RunStatus.PASS);
       expect(run.conditionMet).toBe(false);
     });
 

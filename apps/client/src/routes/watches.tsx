@@ -18,7 +18,6 @@ export const Route = createFileRoute("/watches")({
 
 function statusVariant(status: RunStatus) {
   if (status === "PASS") return "pass";
-  if (status === "FAIL") return "fail";
   return "error";
 }
 

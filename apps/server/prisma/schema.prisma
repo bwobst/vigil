@@ -22,7 +22,6 @@ enum ConditionOperator {
 
 enum RunStatus {
   PASS
-  FAIL
   ERROR
 }
 

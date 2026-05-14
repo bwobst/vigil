@@ -13,7 +13,7 @@ export type ResponseType = "HTML" | "JSON";
 
 export type ConditionOperator = "EQUALS" | "CHANGED" | "LESS_THAN" | "GREATER_THAN";
 
-export type RunStatus = "PASS" | "FAIL" | "ERROR";
+export type RunStatus = "PASS" | "ERROR";
 
 export interface Watch {
   id: string;

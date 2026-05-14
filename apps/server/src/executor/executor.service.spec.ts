@@ -220,6 +220,30 @@ describe("ExecutorService", () => {
         expect(result.conditionMet).toBe(false);
       });
 
+      it("treats integer threshold and decimal extracted value as the same magnitude", async () => {
+        const below = await runWith("LESS_THAN", "189.99", {
+          expectedValue: "190",
+        });
+        expect(below.conditionMet).toBe(true);
+
+        const equal = await runWith("LESS_THAN", "190.00", {
+          expectedValue: "190",
+        });
+        expect(equal.conditionMet).toBe(false);
+
+        const above = await runWith("LESS_THAN", "190.01", {
+          expectedValue: "190",
+        });
+        expect(above.conditionMet).toBe(false);
+      });
+
+      it("parses a currency-prefixed extracted value against a plain threshold", async () => {
+        const result = await runWith("LESS_THAN", "$189.50", {
+          expectedValue: "190",
+        });
+        expect(result.conditionMet).toBe(true);
+      });
+
       it("returns conditionMet false (not error) when extracted value is non-numeric", async () => {
         const result = await runWith("LESS_THAN", "not-a-number", {
           expectedValue: "50",
@@ -249,6 +273,23 @@ describe("ExecutorService", () => {
           expectedValue: "50",
         });
         expect(result.conditionMet).toBe(false);
+      });
+
+      it("treats integer threshold and decimal extracted value as the same magnitude", async () => {
+        const above = await runWith("GREATER_THAN", "190.01", {
+          expectedValue: "190",
+        });
+        expect(above.conditionMet).toBe(true);
+
+        const equal = await runWith("GREATER_THAN", "190.00", {
+          expectedValue: "190",
+        });
+        expect(equal.conditionMet).toBe(false);
+
+        const below = await runWith("GREATER_THAN", "189.99", {
+          expectedValue: "190",
+        });
+        expect(below.conditionMet).toBe(false);
       });
 
       it("returns conditionMet false (not error) when extracted value is non-numeric", async () => {

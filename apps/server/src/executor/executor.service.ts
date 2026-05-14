@@ -71,6 +71,29 @@ function extractFromHtml(html: string, selector: string): string | null {
   return el.text().trim();
 }
 
+const STRICT_NUMERIC = /^-?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?$/;
+
+/**
+ * Parses text for LESS_THAN / GREATER_THAN so plain thresholds (e.g. "190") compare
+ * correctly to formatted extracted values (e.g. "190.00", "$190.00", "1,900.50").
+ */
+function parseComparableNumber(raw: string): number | null {
+  const trimmed = raw.trim();
+  if (trimmed === "") return null;
+
+  const noCommas = trimmed.replace(/,/g, "");
+  if (STRICT_NUMERIC.test(noCommas)) {
+    const n = Number(noCommas);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  const match = trimmed.match(/-?(?:\d[\d,]*(?:\.\d+)?|\.\d+)(?:[eE][-+]?\d+)?/);
+  if (!match) return null;
+  const token = match[0].replace(/,/g, "");
+  const n = Number(token);
+  return Number.isFinite(n) ? n : null;
+}
+
 function evaluateCondition(
   extractedValue: string,
   operator: ConditionOperator,
@@ -83,14 +106,14 @@ function evaluateCondition(
     case "CHANGED":
       return extractedValue !== previousValue;
     case "LESS_THAN": {
-      const current = parseFloat(extractedValue);
-      const threshold = parseFloat(expectedValue ?? "");
-      return !isNaN(current) && !isNaN(threshold) && current < threshold;
+      const current = parseComparableNumber(extractedValue);
+      const threshold = parseComparableNumber(expectedValue ?? "");
+      return current !== null && threshold !== null && current < threshold;
     }
     case "GREATER_THAN": {
-      const current = parseFloat(extractedValue);
-      const threshold = parseFloat(expectedValue ?? "");
-      return !isNaN(current) && !isNaN(threshold) && current > threshold;
+      const current = parseComparableNumber(extractedValue);
+      const threshold = parseComparableNumber(expectedValue ?? "");
+      return current !== null && threshold !== null && current > threshold;
     }
   }
 }

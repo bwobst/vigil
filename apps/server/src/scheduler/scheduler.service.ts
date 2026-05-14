@@ -104,14 +104,7 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
     );
     const completedAt = new Date();
 
-    let status: RunStatus;
-    if (result.error) {
-      status = RunStatus.ERROR;
-    } else if (result.conditionMet) {
-      status = RunStatus.PASS;
-    } else {
-      status = RunStatus.FAIL;
-    }
+    const status: RunStatus = result.error ? RunStatus.ERROR : RunStatus.PASS;
 
     return this.watchRunService.recordRun({
       watchId,

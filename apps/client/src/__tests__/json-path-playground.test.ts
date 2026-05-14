@@ -37,7 +37,17 @@ describe("getPreviewState", () => {
     expect(state.type).toBe("no-matches");
   });
 
-  it("primary value matches what the executor would use (string coercion)", () => {
+  it("returns match with formatted JSON for an object path", () => {
+    const state = getPreviewState(SAMPLE, "$.data");
+    expect(state.type).toBe("match");
+    if (state.type === "match") {
+      expect(state.primary).toContain('"price": 42000');
+      expect(state.primary).toContain("\n");
+      expect(state.primary).not.toContain("[object Object]");
+    }
+  });
+
+  it("primary value for a string field is returned as-is", () => {
     const state = getPreviewState(SAMPLE, "$.data.label");
     expect(state).toMatchObject({ type: "match", primary: "BTC" });
   });
