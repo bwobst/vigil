@@ -58,6 +58,7 @@ model Watch {
   conditionOperator   ConditionOperator
   expectedValue       String?
   scheduleExpression  String
+  notifyEmail         Boolean           @default(false)
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
 

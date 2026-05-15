@@ -36,6 +36,7 @@ function EditWatchPage() {
           conditionOperator: values.conditionOperator,
           expectedValue: values.conditionOperator !== "CHANGED" ? values.expectedValue : null,
           scheduleExpression: values.scheduleExpression,
+          notifyEmail: values.notifyEmail,
         },
       });
       void navigate({ to: "/watches/$id", params: { id }, search: { runsPage: 1 } });
@@ -74,12 +75,14 @@ function EditWatchPage() {
               conditionOperator: watch.conditionOperator,
               expectedValue: watch.expectedValue ?? "",
               scheduleExpression: watch.scheduleExpression,
+              notifyEmail: watch.notifyEmail,
             }}
             onSubmit={handleSubmit}
             onCancel={() => void navigate({ to: "/watches/$id", params: { id }, search: { runsPage: 1 } })}
             submitLabel="Save changes"
             isPending={updateWatch.isPending}
             serverError={serverError}
+            mailReady={watch.mailReady}
           />
         </CardContent>
       </Card>

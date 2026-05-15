@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsEnum,
   IsOptional,
   IsString,
@@ -42,6 +43,10 @@ export class CreateWatchDto {
     message: "scheduleExpression must be a valid cron expression",
   })
   scheduleExpression!: string;
+
+  @IsOptional()
+  @IsBoolean()
+  notifyEmail?: boolean;
 }
 
 export class UpdateWatchDto {
@@ -74,4 +79,8 @@ export class UpdateWatchDto {
     message: "scheduleExpression must be a valid cron expression",
   })
   scheduleExpression?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  notifyEmail?: boolean;
 }

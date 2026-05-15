@@ -2,6 +2,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, apiFetchJson } from "./client";
 import type { CreateWatchInput, UpdateWatchInput, Watch } from "./types";
 
+export function useMailReadiness() {
+  return useQuery({
+    queryKey: ["mail-readiness"],
+    queryFn: () => apiFetch<{ mailReady: boolean }>("/api/mail/readiness"),
+    staleTime: 60_000,
+  });
+}
+
 export function useWatches() {
   return useQuery({
     queryKey: ["watches"],

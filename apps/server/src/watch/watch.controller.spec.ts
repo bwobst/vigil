@@ -9,6 +9,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { PrismaModule } from "../prisma/prisma.module";
 import { AuthModule } from "../auth/auth.module";
 import { hashPassword } from "../password/password-hash";
+import { MailConfigModule } from "../mail/mail-config.module";
 import { WatchModule } from "./watch.module";
 
 const hasDb = !!process.env["DATABASE_URL"];
@@ -42,7 +43,7 @@ describe.skipIf(!hasDb)("Watch HTTP API (integration)", () => {
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
-      imports: [PrismaModule, AuthModule, WatchModule],
+      imports: [PrismaModule, AuthModule, MailConfigModule, WatchModule],
     }).compile();
 
     app = module.createNestApplication();
@@ -137,6 +138,93 @@ describe.skipIf(!hasDb)("Watch HTTP API (integration)", () => {
 
       const user = await prisma.user.findUniqueOrThrow({ where: { email: USER_A_EMAIL } });
       expect(res.body.userId).toBe(user.id);
+    });
+  });
+
+  describe("notifyEmail and mailReady", () => {
+    it("creates a watch with notifyEmail defaulting to false", async () => {
+      const res = await request(app.getHttpServer())
+        .post("/api/watches")
+        .set("Cookie", cookieA)
+        .send(validWatch);
+
+      expect(res.status).toBe(201);
+      expect(res.body.notifyEmail).toBe(false);
+    });
+
+    it("creates a watch with notifyEmail true when provided", async () => {
+      const res = await request(app.getHttpServer())
+        .post("/api/watches")
+        .set("Cookie", cookieA)
+        .send({ ...validWatch, notifyEmail: true });
+
+      expect(res.status).toBe(201);
+      expect(res.body.notifyEmail).toBe(true);
+    });
+
+    it("PATCH persists notifyEmail toggle", async () => {
+      const created = await request(app.getHttpServer())
+        .post("/api/watches")
+        .set("Cookie", cookieA)
+        .send(validWatch);
+
+      const updated = await request(app.getHttpServer())
+        .patch(`/api/watches/${created.body.id}`)
+        .set("Cookie", cookieA)
+        .send({ notifyEmail: true });
+
+      expect(updated.status).toBe(200);
+      expect(updated.body.notifyEmail).toBe(true);
+
+      const toggled = await request(app.getHttpServer())
+        .patch(`/api/watches/${created.body.id}`)
+        .set("Cookie", cookieA)
+        .send({ notifyEmail: false });
+
+      expect(toggled.status).toBe(200);
+      expect(toggled.body.notifyEmail).toBe(false);
+    });
+
+    it("GET /api/watches includes mailReady in each watch", async () => {
+      await request(app.getHttpServer())
+        .post("/api/watches")
+        .set("Cookie", cookieA)
+        .send(validWatch);
+
+      const res = await request(app.getHttpServer())
+        .get("/api/watches")
+        .set("Cookie", cookieA);
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveLength(1);
+      expect(typeof res.body[0].mailReady).toBe("boolean");
+    });
+
+    it("GET /api/watches/:id includes mailReady", async () => {
+      const created = await request(app.getHttpServer())
+        .post("/api/watches")
+        .set("Cookie", cookieA)
+        .send(validWatch);
+
+      const res = await request(app.getHttpServer())
+        .get(`/api/watches/${created.body.id}`)
+        .set("Cookie", cookieA);
+
+      expect(res.status).toBe(200);
+      expect(typeof res.body.mailReady).toBe("boolean");
+    });
+
+    it("mailReady is false when SMTP_HOST/MAIL_FROM not set", async () => {
+      const created = await request(app.getHttpServer())
+        .post("/api/watches")
+        .set("Cookie", cookieA)
+        .send(validWatch);
+
+      const res = await request(app.getHttpServer())
+        .get(`/api/watches/${created.body.id}`)
+        .set("Cookie", cookieA);
+
+      expect(res.body.mailReady).toBe(false);
     });
   });
 

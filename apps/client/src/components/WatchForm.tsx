@@ -14,6 +14,7 @@ export interface WatchFormValues {
   conditionOperator: ConditionOperator;
   expectedValue: string;
   scheduleExpression: string;
+  notifyEmail: boolean;
 }
 
 interface WatchFormProps {
@@ -23,6 +24,7 @@ interface WatchFormProps {
   submitLabel: string;
   isPending: boolean;
   serverError?: string | null;
+  mailReady?: boolean;
 }
 
 const NUMERIC_OPERATORS: ConditionOperator[] = ["LESS_THAN", "GREATER_THAN"];
@@ -58,6 +60,7 @@ export function WatchForm({
   submitLabel,
   isPending,
   serverError,
+  mailReady,
 }: WatchFormProps) {
   const [values, setValues] = useState<WatchFormValues>({
     name: defaultValues?.name ?? "",
@@ -67,6 +70,7 @@ export function WatchForm({
     conditionOperator: defaultValues?.conditionOperator ?? "CHANGED",
     expectedValue: defaultValues?.expectedValue ?? "",
     scheduleExpression: defaultValues?.scheduleExpression ?? "",
+    notifyEmail: defaultValues?.notifyEmail ?? false,
   });
   const [errors, setErrors] = useState<Partial<Record<keyof WatchFormValues, string>>>({});
 
@@ -215,6 +219,27 @@ export function WatchForm({
         />
         {errors.scheduleExpression && (
           <p id="scheduleExpression-error" className="text-sm text-destructive">{errors.scheduleExpression}</p>
+        )}
+      </div>
+
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-3">
+          <input
+            id="notifyEmail"
+            type="checkbox"
+            checked={values.notifyEmail}
+            onChange={(e) => set("notifyEmail", e.target.checked)}
+            className="h-4 w-4 rounded border-input accent-primary"
+          />
+          <Label htmlFor="notifyEmail">Email alerts</Label>
+        </div>
+        <p className="text-sm text-muted-foreground pl-7">
+          Send an email to your account address when the condition is first met or when an execution error occurs.
+        </p>
+        {values.notifyEmail && mailReady === false && (
+          <p className="text-sm text-destructive pl-7" role="alert">
+            Email alerts are enabled but this deployment is not configured for outbound mail. Alerts will not be delivered until an operator configures SMTP.
+          </p>
         )}
       </div>
 

@@ -14,6 +14,7 @@ import {
 } from "@nestjs/common";
 import type { Request } from "express";
 import { AuthService, SESSION_COOKIE } from "../auth/auth.service";
+import { MailConfigService } from "../mail/mail-config.service";
 import { SchedulerService } from "../scheduler/scheduler.service";
 import { WatchRunService } from "../watch-run/watch-run.service";
 import { CreateWatchDto, UpdateWatchDto } from "./watch.dto";
@@ -26,6 +27,7 @@ export class WatchController {
     private readonly schedulerService: SchedulerService,
     private readonly watchRunService: WatchRunService,
     private readonly authService: AuthService,
+    private readonly mailConfigService: MailConfigService,
   ) {}
 
   private async requireAuth(req: Request): Promise<string> {
@@ -36,10 +38,15 @@ export class WatchController {
     return user.id;
   }
 
+  private toResponse<T extends object>(watch: T) {
+    return { ...watch, mailReady: this.mailConfigService.isConfigured() };
+  }
+
   @Get()
   async findAll(@Req() req: Request) {
     const userId = await this.requireAuth(req);
-    return this.watchService.findAll(userId);
+    const watches = await this.watchService.findAll(userId);
+    return watches.map((w) => this.toResponse(w));
   }
 
   @Get(":id")
@@ -47,19 +54,21 @@ export class WatchController {
     const userId = await this.requireAuth(req);
     const watch = await this.watchService.findOne(id, userId);
     if (!watch) throw new NotFoundException();
-    return watch;
+    return this.toResponse(watch);
   }
 
   @Post()
   async create(@Body() dto: CreateWatchDto, @Req() req: Request) {
     const userId = await this.requireAuth(req);
-    return this.watchService.create(dto, userId);
+    const watch = await this.watchService.create(dto, userId);
+    return this.toResponse(watch);
   }
 
   @Patch(":id")
   async update(@Param("id") id: string, @Body() dto: UpdateWatchDto, @Req() req: Request) {
     const userId = await this.requireAuth(req);
-    return this.watchService.update(id, userId, dto);
+    const watch = await this.watchService.update(id, userId, dto);
+    return this.toResponse(watch);
   }
 
   @Delete(":id")

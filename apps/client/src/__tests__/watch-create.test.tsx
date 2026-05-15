@@ -46,6 +46,9 @@ describe("Create Watch page", () => {
       mutateAsync: vi.fn(),
       isPending: false,
     } as any);
+    vi.mocked(useWatchesModule.useMailReadiness).mockReturnValue({
+      data: { mailReady: false },
+    } as any);
   });
 
   it("renders the create form with all fields", async () => {

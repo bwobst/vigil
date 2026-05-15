@@ -29,6 +29,8 @@ export interface Watch {
   conditionOperator: ConditionOperator;
   expectedValue?: string | null;
   scheduleExpression: string;
+  notifyEmail: boolean;
+  mailReady: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -41,6 +43,7 @@ export interface CreateWatchInput {
   conditionOperator: ConditionOperator;
   expectedValue?: string | null;
   scheduleExpression: string;
+  notifyEmail?: boolean;
 }
 
 export interface UpdateWatchInput {
@@ -51,4 +54,5 @@ export interface UpdateWatchInput {
   conditionOperator?: ConditionOperator;
   expectedValue?: string | null;
   scheduleExpression?: string;
+  notifyEmail?: boolean;
 }
