@@ -1,4 +1,4 @@
-import { createRootRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
+import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -6,9 +6,9 @@ import {
   NavigationMenuLink,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Button } from "@/components/ui/button";
 import { ThemeMenu } from "@/components/ThemeMenu";
-import { useSession, useSignOut } from "@/api/session";
+import { UserAccountMenu } from "@/components/UserAccountMenu";
+import { useSession } from "@/api/session";
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -16,14 +16,6 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   const { data: session } = useSession();
-  const signOut = useSignOut();
-  const navigate = useNavigate();
-
-  function handleSignOut() {
-    signOut.mutate(undefined, {
-      onSuccess: () => void navigate({ to: "/sign-in" }),
-    });
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -54,23 +46,11 @@ function RootComponent() {
             </NavigationMenuList>
           </NavigationMenu>
           <div className="ml-auto flex items-center gap-3">
-            {session && (
-              <>
-                <span className="text-sm text-muted-foreground">{session.email}</span>
-                <Link to="/change-password" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Change password
-                </Link>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleSignOut}
-                  disabled={signOut.isPending}
-                >
-                  Sign out
-                </Button>
-              </>
+            {session ? (
+              <UserAccountMenu email={session.email} />
+            ) : (
+              <ThemeMenu />
             )}
-            <ThemeMenu />
           </div>
         </div>
       </header>

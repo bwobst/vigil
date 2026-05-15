@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { routeTree } from "../routeTree.gen";
 import * as sessionModule from "../api/session";
@@ -97,11 +98,20 @@ describe("App routing", () => {
     });
   });
 
-  it("shows user email and sign-out button when authenticated", async () => {
+  it("opens the account menu to show email and sign out when authenticated", async () => {
+    const user = userEvent.setup();
     renderApp("/");
     await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /signed in as user@example.com/i }),
+      ).toBeInTheDocument();
+    });
+    await user.click(
+      screen.getByRole("button", { name: /signed in as user@example.com/i }),
+    );
+    await waitFor(() => {
       expect(screen.getByText("user@example.com")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /sign out/i })).toBeInTheDocument();
+      expect(screen.getByRole("menuitem", { name: /sign out/i })).toBeInTheDocument();
     });
   });
 });
