@@ -26,11 +26,14 @@ enum RunStatus {
 }
 
 model User {
-  id        String    @id @default(uuid(7))
-  email     String    @unique
-  password  String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id                      String    @id @default(uuid(7))
+  email                   String    @unique
+  password                String
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  emailSubscriptionArn    String?
+  emailSubscriptionStatus String?
+  phone                   String?
 
   sessions  Session[]
   watches   Watch[]

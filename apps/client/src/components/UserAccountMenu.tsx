@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { LogOut, Palette, KeyRound } from "lucide-react";
+import { LogOut, Palette, KeyRound, Bell } from "lucide-react";
 import { useSignOut } from "@/api/session";
 import { ThemePreferenceRows } from "@/components/ThemeMenu";
 import { useTheme } from "@/components/ThemeProvider";
@@ -70,6 +70,15 @@ export function UserAccountMenu({ email }: UserAccountMenuProps) {
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link
+            to="/account-notifications"
+            className="flex cursor-default items-center gap-2"
+          >
+            <Bell className="h-4 w-4 shrink-0" aria-hidden="true" />
+            Notification settings
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link
             to="/change-password"

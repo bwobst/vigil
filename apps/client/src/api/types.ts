@@ -1,3 +1,9 @@
+export interface AccountNotificationSettings {
+  email: string;
+  emailSubscriptionStatus: string | null;
+  phone: string | null;
+}
+
 export interface WatchRun {
   id: string;
   watchId: string;

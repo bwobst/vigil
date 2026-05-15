@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthWatchesRouteImport } from './routes/_auth/watches'
 import { Route as AuthChangePasswordRouteImport } from './routes/_auth/change-password'
+import { Route as AuthAccountNotificationsRouteImport } from './routes/_auth/account-notifications'
 import { Route as AuthWatchesNewRouteImport } from './routes/_auth/watches_.new'
 import { Route as AuthWatchesIdRouteImport } from './routes/_auth/watches_.$id'
 import { Route as AuthWatchesIdEditRouteImport } from './routes/_auth/watches_.$id_.edit'
@@ -48,6 +49,12 @@ const AuthChangePasswordRoute = AuthChangePasswordRouteImport.update({
   path: '/change-password',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthAccountNotificationsRoute =
+  AuthAccountNotificationsRouteImport.update({
+    id: '/account-notifications',
+    path: '/account-notifications',
+    getParentRoute: () => AuthRoute,
+  } as any)
 const AuthWatchesNewRoute = AuthWatchesNewRouteImport.update({
   id: '/watches_/new',
   path: '/watches/new',
@@ -68,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/sign-in': typeof SignInRoute
+  '/account-notifications': typeof AuthAccountNotificationsRoute
   '/change-password': typeof AuthChangePasswordRoute
   '/watches': typeof AuthWatchesRoute
   '/watches/$id': typeof AuthWatchesIdRoute
@@ -78,6 +86,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/sign-in': typeof SignInRoute
+  '/account-notifications': typeof AuthAccountNotificationsRoute
   '/change-password': typeof AuthChangePasswordRoute
   '/watches': typeof AuthWatchesRoute
   '/watches/$id': typeof AuthWatchesIdRoute
@@ -90,6 +99,7 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/about': typeof AboutRoute
   '/sign-in': typeof SignInRoute
+  '/_auth/account-notifications': typeof AuthAccountNotificationsRoute
   '/_auth/change-password': typeof AuthChangePasswordRoute
   '/_auth/watches': typeof AuthWatchesRoute
   '/_auth/watches_/$id': typeof AuthWatchesIdRoute
@@ -102,6 +112,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/sign-in'
+    | '/account-notifications'
     | '/change-password'
     | '/watches'
     | '/watches/$id'
@@ -112,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/sign-in'
+    | '/account-notifications'
     | '/change-password'
     | '/watches'
     | '/watches/$id'
@@ -123,6 +135,7 @@ export interface FileRouteTypes {
     | '/_auth'
     | '/about'
     | '/sign-in'
+    | '/_auth/account-notifications'
     | '/_auth/change-password'
     | '/_auth/watches'
     | '/_auth/watches_/$id'
@@ -181,6 +194,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthChangePasswordRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/account-notifications': {
+      id: '/_auth/account-notifications'
+      path: '/account-notifications'
+      fullPath: '/account-notifications'
+      preLoaderRoute: typeof AuthAccountNotificationsRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/watches_/new': {
       id: '/_auth/watches_/new'
       path: '/watches/new'
@@ -206,6 +226,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthRouteChildren {
+  AuthAccountNotificationsRoute: typeof AuthAccountNotificationsRoute
   AuthChangePasswordRoute: typeof AuthChangePasswordRoute
   AuthWatchesRoute: typeof AuthWatchesRoute
   AuthWatchesIdRoute: typeof AuthWatchesIdRoute
@@ -214,6 +235,7 @@ interface AuthRouteChildren {
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
+  AuthAccountNotificationsRoute: AuthAccountNotificationsRoute,
   AuthChangePasswordRoute: AuthChangePasswordRoute,
   AuthWatchesRoute: AuthWatchesRoute,
   AuthWatchesIdRoute: AuthWatchesIdRoute,
