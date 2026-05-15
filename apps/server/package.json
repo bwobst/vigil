@@ -28,6 +28,7 @@
     "cookie-parser": "^1.4.7",
     "cron-parser": "^5.5.0",
     "jsonpath-plus": "^10.4.0",
+    "nodemailer": "^8.0.7",
     "pg-boss": "^9.0.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
@@ -40,6 +41,7 @@
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.0",
     "@types/node": "^24.0.0",
+    "@types/nodemailer": "^8.0.0",
     "@types/supertest": "^7.2.0",
     "prisma": "^6.19.3",
     "supertest": "^7.2.2",

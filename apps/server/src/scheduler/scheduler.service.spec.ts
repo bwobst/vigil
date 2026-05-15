@@ -5,6 +5,8 @@ import { SchedulerService } from "./scheduler.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { ExecutorService } from "../executor/executor.service";
 import { WatchRunService } from "../watch-run/watch-run.service";
+import { MailQueueService } from "../mail/mail-queue.service";
+import { MailConfigService } from "../mail/mail-config.service";
 import { RunStatus } from "../watch-run/watch-run.types";
 
 const makeWatch = (overrides: Record<string, unknown> = {}) => ({
@@ -16,6 +18,7 @@ const makeWatch = (overrides: Record<string, unknown> = {}) => ({
   conditionOperator: "EQUALS",
   expectedValue: "hello",
   scheduleExpression: "*/5 * * * *",
+  notifyEmail: false,
   ...overrides,
 });
 
@@ -27,6 +30,8 @@ describe("SchedulerService (unit)", () => {
   };
   let mockExecutor: { execute: ReturnType<typeof vi.fn> };
   let mockWatchRunService: { recordRun: ReturnType<typeof vi.fn> };
+  let mockMailQueue: { enqueueNotification: ReturnType<typeof vi.fn> };
+  let mockMailConfig: { isConfigured: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     vi.spyOn(Logger.prototype, "warn").mockImplementation(() => {});
@@ -47,12 +52,21 @@ describe("SchedulerService (unit)", () => {
       execute: vi.fn().mockResolvedValue({ extractedValue: "hello", conditionMet: true, error: null }),
     };
     mockWatchRunService = {
-      recordRun: vi.fn().mockResolvedValue({ id: "run-1", status: RunStatus.PASS }),
+      recordRun: vi.fn().mockResolvedValue({ id: "run-1", status: RunStatus.PASS, conditionMet: true }),
     };
+    mockMailQueue = {
+      enqueueNotification: vi.fn().mockResolvedValue(undefined),
+    };
+    mockMailConfig = {
+      isConfigured: vi.fn().mockReturnValue(false),
+    };
+
     service = new SchedulerService(
       mockPrisma as unknown as PrismaService,
       mockExecutor as unknown as ExecutorService,
       mockWatchRunService as unknown as WatchRunService,
+      mockMailQueue as unknown as MailQueueService,
+      mockMailConfig as unknown as MailConfigService,
     );
   });
 
@@ -97,6 +111,72 @@ describe("SchedulerService (unit)", () => {
         .executeIfOwned("nonexistent-watch", "user-A");
 
       expect(mockExecutor.execute).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("mail notification enqueue", () => {
+    it("does not enqueue when notifyEmail is false", async () => {
+      const watch = makeWatch({ notifyEmail: false });
+      mockPrisma.watch.findUniqueOrThrow.mockResolvedValue(watch);
+      mockMailConfig.isConfigured.mockReturnValue(true);
+
+      await (service as unknown as { executeAndRecord(id: string): Promise<unknown> })
+        .executeAndRecord("watch-1");
+
+      expect(mockMailQueue.enqueueNotification).not.toHaveBeenCalled();
+    });
+
+    it("does not enqueue when mail is not configured", async () => {
+      const watch = makeWatch({ notifyEmail: true });
+      mockPrisma.watch.findUniqueOrThrow.mockResolvedValue(watch);
+      mockMailConfig.isConfigured.mockReturnValue(false);
+
+      await (service as unknown as { executeAndRecord(id: string): Promise<unknown> })
+        .executeAndRecord("watch-1");
+
+      expect(mockMailQueue.enqueueNotification).not.toHaveBeenCalled();
+    });
+
+    it("enqueues CONDITION_MET when notifyEmail=true, mail configured, and edge detected (no prior run)", async () => {
+      const watch = makeWatch({ notifyEmail: true });
+      mockPrisma.watch.findUniqueOrThrow.mockResolvedValue(watch);
+      mockMailConfig.isConfigured.mockReturnValue(true);
+      mockPrisma.watchRun.findFirst.mockResolvedValue(null);
+      mockExecutor.execute.mockResolvedValue({ extractedValue: "hello", conditionMet: true, error: null });
+      mockWatchRunService.recordRun.mockResolvedValue({ id: "run-1", status: "PASS", conditionMet: true });
+
+      await (service as unknown as { executeAndRecord(id: string): Promise<unknown> })
+        .executeAndRecord("watch-1");
+
+      expect(mockMailQueue.enqueueNotification).toHaveBeenCalledWith("watch-1", "run-1", "CONDITION_MET");
+    });
+
+    it("enqueues EXECUTION_ERROR when notifyEmail=true, mail configured, and first ERROR run", async () => {
+      const watch = makeWatch({ notifyEmail: true });
+      mockPrisma.watch.findUniqueOrThrow.mockResolvedValue(watch);
+      mockMailConfig.isConfigured.mockReturnValue(true);
+      mockPrisma.watchRun.findFirst.mockResolvedValue(null);
+      mockExecutor.execute.mockResolvedValue({ extractedValue: null, conditionMet: null, error: "Timeout" });
+      mockWatchRunService.recordRun.mockResolvedValue({ id: "run-2", status: "ERROR", conditionMet: null });
+
+      await (service as unknown as { executeAndRecord(id: string): Promise<unknown> })
+        .executeAndRecord("watch-1");
+
+      expect(mockMailQueue.enqueueNotification).toHaveBeenCalledWith("watch-1", "run-2", "EXECUTION_ERROR");
+    });
+
+    it("does not enqueue when condition stays met (no edge)", async () => {
+      const watch = makeWatch({ notifyEmail: true });
+      mockPrisma.watch.findUniqueOrThrow.mockResolvedValue(watch);
+      mockMailConfig.isConfigured.mockReturnValue(true);
+      mockPrisma.watchRun.findFirst.mockResolvedValue({ status: "PASS", conditionMet: true });
+      mockExecutor.execute.mockResolvedValue({ extractedValue: "hello", conditionMet: true, error: null });
+      mockWatchRunService.recordRun.mockResolvedValue({ id: "run-3", status: "PASS", conditionMet: true });
+
+      await (service as unknown as { executeAndRecord(id: string): Promise<unknown> })
+        .executeAndRecord("watch-1");
+
+      expect(mockMailQueue.enqueueNotification).not.toHaveBeenCalled();
     });
   });
 });

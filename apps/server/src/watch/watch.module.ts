@@ -1,13 +1,13 @@
 import { Module } from "@nestjs/common";
 import { AuthModule } from "../auth/auth.module";
-import { MailConfigModule } from "../mail/mail-config.module";
+import { MailModule } from "../mail/mail.module";
 import { SchedulerModule } from "../scheduler/scheduler.module";
 import { WatchRunModule } from "../watch-run/watch-run.module";
 import { WatchController } from "./watch.controller";
 import { WatchService } from "./watch.service";
 
 @Module({
-  imports: [AuthModule, MailConfigModule, SchedulerModule, WatchRunModule],
+  imports: [AuthModule, MailModule, SchedulerModule, WatchRunModule],
   controllers: [WatchController],
   providers: [WatchService],
   exports: [WatchService],

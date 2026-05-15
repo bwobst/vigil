@@ -5,6 +5,9 @@ import { ExecutorService } from "../executor/executor.service";
 import { WatchRunService } from "../watch-run/watch-run.service";
 import { RunStatus } from "../watch-run/watch-run.types";
 import type { WatchRun } from "../watch-run/watch-run.entity";
+import { MailQueueService } from "../mail/mail-queue.service";
+import { MailConfigService } from "../mail/mail-config.service";
+import { detectNotificationEdge } from "../mail/mail-notification.policy";
 
 interface WatchJobData {
   watchId: string;
@@ -20,6 +23,7 @@ type WatchRecord = {
   conditionOperator: string;
   expectedValue: string | null;
   scheduleExpression: string;
+  notifyEmail: boolean;
 };
 
 @Injectable()
@@ -31,6 +35,8 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
     private readonly prisma: PrismaService,
     private readonly executor: ExecutorService,
     private readonly watchRunService: WatchRunService,
+    private readonly mailQueue: MailQueueService,
+    private readonly mailConfig: MailConfigService,
   ) {}
 
   async onModuleInit() {
@@ -105,7 +111,7 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
     const watch = await this.prisma.watch.findUniqueOrThrow({ where: { id: watchId } });
     const previousRun = await this.prisma.watchRun.findFirst({
       where: { watchId },
-      orderBy: { startedAt: "desc" },
+      orderBy: [{ startedAt: "desc" }, { id: "desc" }],
     });
 
     const startedAt = new Date();
@@ -123,7 +129,7 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
 
     const status: RunStatus = result.error ? RunStatus.ERROR : RunStatus.PASS;
 
-    return this.watchRunService.recordRun({
+    const newRun = await this.watchRunService.recordRun({
       watchId,
       startedAt,
       completedAt,
@@ -132,5 +138,17 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
       conditionMet: result.conditionMet,
       error: result.error,
     });
+
+    if (watch.notifyEmail && this.mailConfig.isConfigured()) {
+      const edge = detectNotificationEdge(
+        { status: newRun.status, conditionMet: newRun.conditionMet ?? null },
+        previousRun ? { status: previousRun.status, conditionMet: previousRun.conditionMet ?? null } : null,
+      );
+      if (edge) {
+        await this.mailQueue.enqueueNotification(watchId, newRun.id, edge);
+      }
+    }
+
+    return newRun;
   }
 }
