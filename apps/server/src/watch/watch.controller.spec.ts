@@ -9,7 +9,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { PrismaModule } from "../prisma/prisma.module";
 import { AuthModule } from "../auth/auth.module";
 import { hashPassword } from "../password/password-hash";
-import { MailConfigModule } from "../mail/mail-config.module";
+import { NotificationConfigModule } from "../notification/notification-config.module";
 import { WatchModule } from "./watch.module";
 
 const hasDb = !!process.env["DATABASE_URL"];
@@ -43,7 +43,7 @@ describe.skipIf(!hasDb)("Watch HTTP API (integration)", () => {
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
-      imports: [PrismaModule, AuthModule, MailConfigModule, WatchModule],
+      imports: [PrismaModule, AuthModule, NotificationConfigModule, WatchModule],
     }).compile();
 
     app = module.createNestApplication();
@@ -141,7 +141,7 @@ describe.skipIf(!hasDb)("Watch HTTP API (integration)", () => {
     });
   });
 
-  describe("notifyEmail and mailReady", () => {
+  describe("notifyEmail and notificationsReady", () => {
     it("creates a watch with notifyEmail defaulting to false", async () => {
       const res = await request(app.getHttpServer())
         .post("/api/watches")
@@ -185,7 +185,7 @@ describe.skipIf(!hasDb)("Watch HTTP API (integration)", () => {
       expect(toggled.body.notifyEmail).toBe(false);
     });
 
-    it("GET /api/watches includes mailReady in each watch", async () => {
+    it("GET /api/watches includes notificationsReady in each watch", async () => {
       await request(app.getHttpServer())
         .post("/api/watches")
         .set("Cookie", cookieA)
@@ -197,10 +197,10 @@ describe.skipIf(!hasDb)("Watch HTTP API (integration)", () => {
 
       expect(res.status).toBe(200);
       expect(res.body).toHaveLength(1);
-      expect(typeof res.body[0].mailReady).toBe("boolean");
+      expect(typeof res.body[0].notificationsReady).toBe("boolean");
     });
 
-    it("GET /api/watches/:id includes mailReady", async () => {
+    it("GET /api/watches/:id includes notificationsReady", async () => {
       const created = await request(app.getHttpServer())
         .post("/api/watches")
         .set("Cookie", cookieA)
@@ -211,10 +211,10 @@ describe.skipIf(!hasDb)("Watch HTTP API (integration)", () => {
         .set("Cookie", cookieA);
 
       expect(res.status).toBe(200);
-      expect(typeof res.body.mailReady).toBe("boolean");
+      expect(typeof res.body.notificationsReady).toBe("boolean");
     });
 
-    it("mailReady is false when SMTP_HOST/MAIL_FROM not set", async () => {
+    it("notificationsReady is false when SNS_TOPIC_ARN not set", async () => {
       const created = await request(app.getHttpServer())
         .post("/api/watches")
         .set("Cookie", cookieA)
@@ -224,7 +224,7 @@ describe.skipIf(!hasDb)("Watch HTTP API (integration)", () => {
         .get(`/api/watches/${created.body.id}`)
         .set("Cookie", cookieA);
 
-      expect(res.body.mailReady).toBe(false);
+      expect(res.body.notificationsReady).toBe(false);
     });
   });
 

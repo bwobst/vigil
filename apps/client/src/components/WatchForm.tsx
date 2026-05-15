@@ -24,7 +24,7 @@ interface WatchFormProps {
   submitLabel: string;
   isPending: boolean;
   serverError?: string | null;
-  mailReady?: boolean;
+  notificationsReady?: boolean;
 }
 
 const NUMERIC_OPERATORS: ConditionOperator[] = ["LESS_THAN", "GREATER_THAN"];
@@ -60,7 +60,7 @@ export function WatchForm({
   submitLabel,
   isPending,
   serverError,
-  mailReady,
+  notificationsReady,
 }: WatchFormProps) {
   const [values, setValues] = useState<WatchFormValues>({
     name: defaultValues?.name ?? "",
@@ -236,9 +236,9 @@ export function WatchForm({
         <p className="text-sm text-muted-foreground pl-7">
           Send an email to your account address when the condition is first met or when an execution error occurs.
         </p>
-        {values.notifyEmail && mailReady === false && (
+        {values.notifyEmail && notificationsReady === false && (
           <p className="text-sm text-destructive pl-7" role="alert">
-            Email alerts are enabled but this deployment is not configured for outbound mail. Alerts will not be delivered until an operator configures SMTP.
+            Email alerts are enabled but this deployment is not configured for notifications. Alerts will not be delivered until an operator configures SNS_TOPIC_ARN.
           </p>
         )}
       </div>

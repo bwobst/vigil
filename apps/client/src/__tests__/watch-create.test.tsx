@@ -46,8 +46,8 @@ describe("Create Watch page", () => {
       mutateAsync: vi.fn(),
       isPending: false,
     } as any);
-    vi.mocked(useWatchesModule.useMailReadiness).mockReturnValue({
-      data: { mailReady: false },
+    vi.mocked(useWatchesModule.useNotificationReadiness).mockReturnValue({
+      data: { notificationsReady: false },
     } as any);
   });
 

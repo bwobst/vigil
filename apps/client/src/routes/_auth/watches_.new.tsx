@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useCreateWatch, useMailReadiness } from "@/api/watches";
+import { useCreateWatch, useNotificationReadiness } from "@/api/watches";
 import { WatchForm, type WatchFormValues } from "@/components/WatchForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "@tanstack/react-router";
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/_auth/watches_/new")({
 function CreateWatchPage() {
   const navigate = useNavigate();
   const createWatch = useCreateWatch();
-  const { data: mailReadiness } = useMailReadiness();
+  const { data: notificationReadiness } = useNotificationReadiness();
   const [serverError, setServerError] = useState<string | null>(null);
 
   async function handleSubmit(values: WatchFormValues) {
@@ -56,7 +56,7 @@ function CreateWatchPage() {
             submitLabel="Create Watch"
             isPending={createWatch.isPending}
             serverError={serverError}
-            mailReady={mailReadiness?.mailReady}
+            notificationsReady={notificationReadiness?.notificationsReady}
           />
         </CardContent>
       </Card>

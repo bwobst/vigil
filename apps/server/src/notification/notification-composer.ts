@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { EdgeType } from "./mail-notification.policy";
+import type { EdgeType } from "./notification.policy";
 
 const MAX_VALUE_LEN = 200;
 const MAX_ERROR_LEN = 200;
@@ -13,20 +13,20 @@ function sanitize(s: string): string {
   return s.replace(/[\r\n]+/g, " ").trim();
 }
 
-export interface MailMessage {
+export interface NotificationMessage {
   to: string;
   subject: string;
   text: string;
 }
 
 @Injectable()
-export class MailComposer {
+export class NotificationComposer {
   compose(
     edgeType: EdgeType,
     watch: { id: string; name: string },
     run: { startedAt: Date; extractedValue: string | null; error: string | null },
     user: { email: string },
-  ): MailMessage {
+  ): NotificationMessage {
     const baseUrl = (process.env["PUBLIC_BASE_URL"] ?? "").replace(/\/$/, "");
     const watchLink = `${baseUrl}/watches/${watch.id}`;
     const runTime = run.startedAt.toISOString();

@@ -2,10 +2,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, apiFetchJson } from "./client";
 import type { CreateWatchInput, UpdateWatchInput, Watch } from "./types";
 
-export function useMailReadiness() {
+export function useNotificationReadiness() {
   return useQuery({
-    queryKey: ["mail-readiness"],
-    queryFn: () => apiFetch<{ mailReady: boolean }>("/api/mail/readiness"),
+    queryKey: ["notification-readiness"],
+    queryFn: () => apiFetch<{ notificationsReady: boolean }>("/api/notifications/readiness"),
     staleTime: 60_000,
   });
 }

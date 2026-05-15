@@ -30,7 +30,7 @@ export interface Watch {
   expectedValue?: string | null;
   scheduleExpression: string;
   notifyEmail: boolean;
-  mailReady: boolean;
+  notificationsReady: boolean;
   createdAt: string;
   updatedAt: string;
 }

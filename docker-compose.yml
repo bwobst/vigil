@@ -14,25 +14,17 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-  mailpit:
-    image: axllent/mailpit
-    ports:
-      - "1025:1025"
-      - "8025:8025"
   app-dev:
     image: node:22-bookworm
     working_dir: /workspace
     depends_on:
       postgres:
         condition: service_healthy
-      mailpit:
-        condition: service_started
     env_file:
       - ./apps/server/.env
     environment:
       DATABASE_URL: postgresql://vigil:vigil@postgres:5432/vigil?schema=public
-      # Inside Docker, SMTP must target the mailpit service — not localhost.
-      SMTP_HOST: mailpit
+      NOTIFICATION_BACKEND: mock
     ports:
       - "3000:3000"
       - "5173:5173"

@@ -26,7 +26,7 @@ const mockWatch = {
   expectedValue: null,
   scheduleExpression: "*/5 * * * *",
   notifyEmail: false,
-  mailReady: false,
+  notificationsReady: false,
   createdAt: "2024-01-01T00:00:00Z",
   updatedAt: "2024-01-01T00:00:00Z",
 };

@@ -1,31 +1,31 @@
 import "reflect-metadata";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { MailComposer } from "./mail-composer";
+import { NotificationComposer } from "./notification-composer";
 
 const BASE_URL = "https://vigil.example.com";
 const watch = { id: "watch-abc", name: "My Price Watch" };
 const user = { email: "user@example.com" };
 const runTime = new Date("2026-05-15T10:30:00.000Z");
 
-describe("MailComposer", () => {
-  let composer: MailComposer;
+describe("NotificationComposer", () => {
+  let composer: NotificationComposer;
 
   beforeEach(() => {
     vi.stubEnv("PUBLIC_BASE_URL", BASE_URL);
-    composer = new MailComposer();
+    composer = new NotificationComposer();
   });
 
   afterEach(() => {
     vi.unstubAllEnvs();
   });
 
-  describe("CONDITION_MET email", () => {
+  describe("CONDITION_MET notification", () => {
     it("produces correct subject for condition met", () => {
       const result = composer.compose("CONDITION_MET", watch, { startedAt: runTime, extractedValue: "42.00", error: null }, user);
       expect(result.subject).toBe("Vigil alert: condition met — My Price Watch");
     });
 
-    it("addresses email to user", () => {
+    it("addresses notification to user", () => {
       const result = composer.compose("CONDITION_MET", watch, { startedAt: runTime, extractedValue: "42.00", error: null }, user);
       expect(result.to).toBe("user@example.com");
     });
@@ -57,7 +57,7 @@ describe("MailComposer", () => {
     });
   });
 
-  describe("EXECUTION_ERROR email", () => {
+  describe("EXECUTION_ERROR notification", () => {
     it("produces correct subject for execution error", () => {
       const result = composer.compose("EXECUTION_ERROR", watch, { startedAt: runTime, extractedValue: null, error: "Connection refused" }, user);
       expect(result.subject).toBe("Vigil alert: execution error — My Price Watch");

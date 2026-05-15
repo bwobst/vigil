@@ -14,7 +14,7 @@ import {
 } from "@nestjs/common";
 import type { Request } from "express";
 import { AuthService, SESSION_COOKIE } from "../auth/auth.service";
-import { MailConfigService } from "../mail/mail-config.service";
+import { NotificationConfigService } from "../notification/notification-config.service";
 import { SchedulerService } from "../scheduler/scheduler.service";
 import { WatchRunService } from "../watch-run/watch-run.service";
 import { CreateWatchDto, UpdateWatchDto } from "./watch.dto";
@@ -27,7 +27,7 @@ export class WatchController {
     private readonly schedulerService: SchedulerService,
     private readonly watchRunService: WatchRunService,
     private readonly authService: AuthService,
-    private readonly mailConfigService: MailConfigService,
+    private readonly notificationConfigService: NotificationConfigService,
   ) {}
 
   private async requireAuth(req: Request): Promise<string> {
@@ -39,14 +39,14 @@ export class WatchController {
   }
 
   private toResponse<T extends object>(watch: T) {
-    return { ...watch, mailReady: this.mailConfigService.isConfigured() };
+    return { ...watch, notificationsReady: this.notificationConfigService.isConfigured() };
   }
 
   @Get()
   async findAll(@Req() req: Request) {
     const userId = await this.requireAuth(req);
     const watches = await this.watchService.findAll(userId);
-    return watches.map((w) => this.toResponse(w));
+    return watches.map((w: (typeof watches)[number]) => this.toResponse(w));
   }
 
   @Get(":id")

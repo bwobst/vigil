@@ -82,7 +82,7 @@ function EditWatchPage() {
             submitLabel="Save changes"
             isPending={updateWatch.isPending}
             serverError={serverError}
-            mailReady={watch.mailReady}
+            notificationsReady={watch.notificationsReady}
           />
         </CardContent>
       </Card>

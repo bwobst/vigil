@@ -5,9 +5,9 @@ import { ExecutorService } from "../executor/executor.service";
 import { WatchRunService } from "../watch-run/watch-run.service";
 import { RunStatus } from "../watch-run/watch-run.types";
 import type { WatchRun } from "../watch-run/watch-run.entity";
-import { MailQueueService } from "../mail/mail-queue.service";
-import { MailConfigService } from "../mail/mail-config.service";
-import { detectNotificationEdge } from "../mail/mail-notification.policy";
+import { NotificationQueueWorker } from "../notification/notification-queue-worker";
+import { NotificationConfigService } from "../notification/notification-config.service";
+import { detectNotificationEdge } from "../notification/notification.policy";
 
 interface WatchJobData {
   watchId: string;
@@ -35,8 +35,8 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
     private readonly prisma: PrismaService,
     private readonly executor: ExecutorService,
     private readonly watchRunService: WatchRunService,
-    private readonly mailQueue: MailQueueService,
-    private readonly mailConfig: MailConfigService,
+    private readonly notificationQueue: NotificationQueueWorker,
+    private readonly notificationConfig: NotificationConfigService,
   ) {}
 
   async onModuleInit() {
@@ -139,13 +139,13 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
       error: result.error,
     });
 
-    if (watch.notifyEmail && this.mailConfig.isConfigured()) {
+    if (watch.notifyEmail && this.notificationConfig.isConfigured()) {
       const edge = detectNotificationEdge(
         { status: newRun.status, conditionMet: newRun.conditionMet ?? null },
         previousRun ? { status: previousRun.status, conditionMet: previousRun.conditionMet ?? null } : null,
       );
       if (edge) {
-        await this.mailQueue.enqueueNotification(watchId, newRun.id, edge);
+        await this.notificationQueue.enqueueNotification(watchId, newRun.id, edge);
       }
     }
 
