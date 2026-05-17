@@ -11,14 +11,7 @@ import {
 import type { Request, Response } from "express";
 import { IsEmail, IsString, MinLength } from "class-validator";
 import { AuthService, SESSION_COOKIE } from "./auth.service";
-
-const COOKIE_OPTIONS = {
-  httpOnly: true,
-  sameSite: "lax" as const,
-  secure: process.env["NODE_ENV"] === "production",
-  path: "/",
-  maxAge: 365 * 24 * 60 * 60 * 1000,
-};
+import { sessionClearCookieOptions, sessionCookieOptions } from "./session-cookie";
 
 class SignInDto {
   @IsEmail()
@@ -65,7 +58,7 @@ export class AuthController {
       return;
     }
 
-    res.cookie(SESSION_COOKIE, result.sessionId, COOKIE_OPTIONS);
+    res.cookie(SESSION_COOKIE, result.sessionId, sessionCookieOptions(req));
     return {};
   }
 
@@ -76,7 +69,7 @@ export class AuthController {
     if (sessionId) {
       await this.authService.signOut(sessionId);
     }
-    res.clearCookie(SESSION_COOKIE, { path: "/", sameSite: "lax", secure: process.env["NODE_ENV"] === "production" });
+    res.clearCookie(SESSION_COOKIE, sessionClearCookieOptions(req));
     return {};
   }
 
