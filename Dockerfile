@@ -17,8 +17,8 @@ COPY . .
 
 RUN pnpm --filter server exec prisma generate
 RUN pnpm build
-ENV CI=true
-RUN pnpm prune --prod
+RUN pnpm --filter server deploy --prod --legacy /prod/server
+RUN cd /prod/server && npx --yes prisma@6.19.3 generate
 
 FROM node:22-bookworm AS runtime
 
@@ -31,13 +31,10 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-COPY --from=build /app/package.json /app/pnpm-workspace.yaml ./
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/apps/server/dist ./apps/server/dist
-COPY --from=build /app/apps/server/package.json ./apps/server/package.json
-COPY --from=build /app/apps/server/prisma ./apps/server/prisma
-COPY --from=build /app/packages/json-extractor/dist ./packages/json-extractor/dist
-COPY --from=build /app/packages/json-extractor/package.json ./packages/json-extractor/package.json
+COPY --from=build /prod/server/dist ./apps/server/dist
+COPY --from=build /prod/server/node_modules ./apps/server/node_modules
+COPY --from=build /prod/server/package.json ./apps/server/package.json
+COPY --from=build /prod/server/prisma ./apps/server/prisma
 COPY --from=build /app/apps/client/dist /srv/public
 COPY Caddyfile /etc/caddy/Caddyfile
 
