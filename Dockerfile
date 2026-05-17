@@ -24,7 +24,8 @@ FROM node:22-bookworm AS runtime
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends caddy \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* \
+  && npm install -g prisma@6.19.3
 
 WORKDIR /app
 
